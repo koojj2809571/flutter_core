@@ -28,10 +28,27 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     NavigatorManger().addWidget(this);
     WidgetsBinding.instance.addObserver(this);
     LogUtil.logDebug(tag: '当前页面 =====>', text: getWidgetName());
+    HttpUtil().httpController().addListener(_onController);
     onCreate();
     if (mounted) {}
     super.initState();
   }
+
+  void _onController(){
+    if(isAutoHandleHttpResult()) {
+      setEmptyWidgetVisible(HttpUtil()
+          .httpController()
+          .isEmpty);
+      setErrorWidgetVisible(HttpUtil()
+          .httpController()
+          .isError);
+      setLoadingWidgetVisible(HttpUtil()
+          .httpController()
+          .isLoading);
+    }
+  }
+
+  bool isAutoHandleHttpResult() => false;
 
   @override
   void didChangeDependencies() {
@@ -63,8 +80,6 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     super.deactivate();
   }
 
-  //todo 添加点击收起对话框,点击返回实体按键功能!!!!!!!!!!!!!!!!!!!
-
   @override
   Widget build(BuildContext context) {
     // 调用场景与deactivate类似, 区别在于每次调用setState后该方法也会被调用
@@ -77,7 +92,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     buildBeforeReturn();
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusMode,
-      child: _buildProviderWrapper(context),
+      child: _buildOnBackPressedWrapper(context),
     );
   }
 
@@ -111,8 +126,31 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     super.didChangeAppLifecycleState(state);
   }
 
+  /// 点击返回按按钮时执行逻辑
+  Widget _buildOnBackPressedWrapper(BuildContext context){
+    return WillPopScope(
+      child: _buildAutoHideKeyboardWrapper(context),
+      onWillPop: onBackPressed,
+    );
+  }
+
+  // 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法
+  Future<bool> onBackPressed() async => true;
+
+  /// 点击页面收起键盘
+  Widget _buildAutoHideKeyboardWrapper(BuildContext context){
+    return canClickPageHideKeyboard() ? GestureDetector(
+      onTap: (){
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: _buildProviderWrapper(context),
+    ) : _buildProviderWrapper(context);
+  }
+
+  bool canClickPageHideKeyboard() => false;
+
   /// 封装状态管理组件
-  _buildProviderWrapper(BuildContext context) {
+  Widget _buildProviderWrapper(BuildContext context) {
     return !getProvider().empty
         ? MultiProvider(
             providers: getProvider(),

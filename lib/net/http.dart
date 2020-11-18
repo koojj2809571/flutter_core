@@ -8,6 +8,7 @@ class HttpUtil {
   new Map<String, CancelToken>();
 
   Dio dio;
+  HttpController controller;
 
   HttpUtil._internal() {
     Configuration configuration = Configuration();
@@ -36,6 +37,8 @@ class HttpUtil {
   void cancelRequest(String tokenName) {
     _cancelTokens[tokenName].cancel("cancelled");
   }
+
+  HttpController httpController() => controller;
 
   void removeCancelToken(BuildContext context){
     _cancelTokens.remove(_getCancelToken(context));
@@ -259,5 +262,21 @@ InterceptorsWrapper log = InterceptorsWrapper(
       tag: LogUtil.TAG_HTTP_END,
       text: '${e.response.statusCode} >>> ${e.message}',
     );
+  },
+);
+
+HttpController controller = HttpController();
+
+InterceptorsWrapper connectionStatus = InterceptorsWrapper(
+  onRequest: (RequestOptions options){
+    controller.startLoading();
+    return options;
+  },
+  onResponse: (Response response){
+    controller.onSuccess();
+    return response;
+  },
+  onError: (DioError e){
+    controller.onError(e);
   },
 );

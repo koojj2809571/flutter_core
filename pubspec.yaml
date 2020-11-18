@@ -25,7 +25,7 @@ dependencies:
   # 通讯 http
   dio: ^3.0.10
 
-  # 消息提示款(吐司)
+  # 消息提示(吐司)
   fluttertoast: ^7.1.1
 
   # 状态管理
