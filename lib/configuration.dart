@@ -39,17 +39,24 @@ const String RESPONSE_TYPE = 'RESPONSE_TYPE';
 const String BASE_URL_MAP = 'BASE_URL_MAP';
 
 class Configuration{
-  static const Map<String,dynamic> CONFIGURATION = {};
-  static const List<Interceptor> INTERCEPTORS = [];
-  static const Map<String,String> BASE_URLS = {};
+  static Map<String,dynamic> configurations = {};
+  static List<Interceptor> interceptorList = [];
+  static Map<String,String> baseUrlMap = {};
 
   factory Configuration() =>_getInstance();
   static Configuration get instance => _getInstance();
   static Configuration _instance;
 
   Configuration._internal() {
-    CONFIGURATION[CONTENT_TYPE] = Headers.formUrlEncodedContentType;
-    CONFIGURATION[RESPONSE_TYPE] = ResponseType.json;
+    configurations[IS_PRINT] = true;
+    configurations[NATIVE_API_HOST] = '';
+    configurations[CONNECT_TIMEOUT] = 15000;
+    configurations[RECEIVE_TIMEOUT] = 15000;
+    configurations[INTERCEPTOR] = [];
+    configurations[INITIAL_HEADERS] = {};
+    configurations[CONTENT_TYPE] = Headers.formUrlEncodedContentType;
+    configurations[RESPONSE_TYPE] = ResponseType.json;
+    configurations[BASE_URL_MAP] = {};
   }
   static Configuration _getInstance() {
     if (_instance == null) {
@@ -59,61 +66,61 @@ class Configuration{
   }
 
   Map<String,dynamic> getNetConfigs(){
-    return CONFIGURATION;
+    return configurations;
   }
 
   void printHttpLog(bool isPrint){
-    CONFIGURATION[IS_PRINT] = isPrint;
+    configurations[IS_PRINT] = isPrint;
   }
 
   void setInitialHeaders(Map<String,String> headers){
-    CONFIGURATION[INITIAL_HEADERS] = headers;
+    configurations[INITIAL_HEADERS] = headers;
   }
 
   void setHost(String host){
-    CONFIGURATION[NATIVE_API_HOST] = host;
+    configurations[NATIVE_API_HOST] = host;
   }
 
   void setContentType(String type){
-    CONFIGURATION[CONTENT_TYPE] = type;
+    configurations[CONTENT_TYPE] = type;
   }
 
-  void setResponseType(String type){
-    CONFIGURATION[RESPONSE_TYPE] = type;
+  void setResponseType(ResponseType type){
+    configurations[RESPONSE_TYPE] = type;
   }
 
   void setConnectTimeout(int delayed){
-    CONFIGURATION[CONNECT_TIMEOUT] = delayed;
+    configurations[CONNECT_TIMEOUT] = delayed;
   }
 
   void setReceiveTimeout(int delayed){
-    CONFIGURATION[RECEIVE_TIMEOUT] = delayed;
+    configurations[RECEIVE_TIMEOUT] = delayed;
   }
 
-  void setInterceptor(InterceptorsWrapper interceptor){
-    INTERCEPTORS.add(interceptor);
-    CONFIGURATION[INTERCEPTOR] = INTERCEPTORS;
+  void setInterceptor(Interceptor interceptor){
+    interceptorList.add(interceptor);
+    configurations[INTERCEPTOR] = interceptorList;
   }
 
-  void setInterceptors(List<InterceptorsWrapper> interceptors){
-    INTERCEPTORS.addAll(interceptors);
-    CONFIGURATION[INTERCEPTOR] = INTERCEPTORS;
+  void setInterceptors(List<Interceptor> interceptors){
+    interceptorList.addAll(interceptors);
+    configurations[INTERCEPTOR] = interceptorList;
   }
 
   void addBaseUrl(String urlName,String url){
-    BASE_URLS[urlName] = url;
-    CONFIGURATION[BASE_URL_MAP] = BASE_URLS;
+    baseUrlMap[urlName] = url;
+    configurations[BASE_URL_MAP] = baseUrlMap;
   }
 
   void setBaseUrlMap(Map<String,String> baseUrls){
-    BASE_URLS.addAll(baseUrls);
-    CONFIGURATION[BASE_URL_MAP] = BASE_URLS;
+    baseUrlMap.addAll(baseUrls);
+    configurations[BASE_URL_MAP] = baseUrlMap;
   }
 
   T getConfiguration<T>(String key) {
-    if (CONFIGURATION[key] == null) {
+    if (configurations[key] == null) {
       throw Exception("$key IS NULL");
     }
-    return CONFIGURATION[key] as T;
+    return configurations[key] as T;
   }
 }

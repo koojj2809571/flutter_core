@@ -44,8 +44,8 @@ class HttpUtil {
       receiveTimeout: configuration.getConfiguration<int>(RECEIVE_TIMEOUT),
       headers:
           configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS),
-      contentType: Headers.formUrlEncodedContentType,
-      responseType: ResponseType.json,
+      contentType: configuration.getConfiguration<String>(CONTENT_TYPE),
+      responseType: configuration.getConfiguration<ResponseType>(RESPONSE_TYPE),
     );
 
     _dio = new Dio(options);
@@ -57,7 +57,7 @@ class HttpUtil {
     }
     // 配置拦截器
     _dio.interceptors.addAll(
-        configuration.getConfiguration<List<InterceptorsWrapper>>(INTERCEPTOR));
+        configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR));
 
     _dio.interceptors.add(connectionStatus);
   }
@@ -185,8 +185,6 @@ ErrorEntity createErrorEntity(DioError error) {
       {
         try {
           int errCode = error.response.statusCode;
-          // String errMsg = error.response.statusMessage;
-          // return ErrorEntity(code: errCode, message: errMsg);
           switch (errCode) {
             case 400:
               {
