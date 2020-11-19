@@ -16,7 +16,7 @@ abstract class BasePage extends StatefulWidget {
 }
 
 abstract class BasePageState<T extends BasePage> extends State<T>
-    with WidgetsBindingObserver, BaseFunction {
+    with WidgetsBindingObserver, BaseFunction, BaseScaffold {
   bool _onResumed = false; //页面展示标记
   bool _onPause = false; //页面暂停标记
 
@@ -34,17 +34,11 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     super.initState();
   }
 
-  void _onController(){
-    if(isAutoHandleHttpResult()) {
-      setEmptyWidgetVisible(HttpUtil()
-          .httpController()
-          .isEmpty);
-      setErrorWidgetVisible(HttpUtil()
-          .httpController()
-          .isError);
-      setLoadingWidgetVisible(HttpUtil()
-          .httpController()
-          .isLoading);
+  void _onController() {
+    if (isAutoHandleHttpResult()) {
+      setEmptyWidgetVisible(HttpUtil().httpController().isEmpty);
+      setErrorWidgetVisible(HttpUtil().httpController().isError);
+      setLoadingWidgetVisible(HttpUtil().httpController().isLoading);
     }
   }
 
@@ -127,7 +121,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   }
 
   /// 点击返回按按钮时执行逻辑
-  Widget _buildOnBackPressedWrapper(BuildContext context){
+  Widget _buildOnBackPressedWrapper(BuildContext context) {
     return WillPopScope(
       child: _buildAutoHideKeyboardWrapper(context),
       onWillPop: onBackPressed,
@@ -138,13 +132,15 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   Future<bool> onBackPressed() async => true;
 
   /// 点击页面收起键盘
-  Widget _buildAutoHideKeyboardWrapper(BuildContext context){
-    return canClickPageHideKeyboard() ? GestureDetector(
-      onTap: (){
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-      child: _buildProviderWrapper(context),
-    ) : _buildProviderWrapper(context);
+  Widget _buildAutoHideKeyboardWrapper(BuildContext context) {
+    return canClickPageHideKeyboard()
+        ? GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: _buildProviderWrapper(context),
+          )
+        : _buildProviderWrapper(context);
   }
 
   /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
@@ -155,9 +151,11 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     return !getProvider().empty
         ? MultiProvider(
             providers: getProvider(),
-            child: buildCustomerPage() ?? getPage(_buildContentWrapper(context)),
+            child: _buildCustomerPageLayout(_buildContentWrapper(context)) ??
+                _buildPageLayout(_buildContentWrapper(context)),
           )
-        : buildCustomerPage() ?? getPage(_buildContentWrapper(context));
+        : _buildCustomerPageLayout(_buildContentWrapper(context)) ??
+            _buildPageLayout(_buildContentWrapper(context));
   }
 
   /// 重写添加状态管理的provider
@@ -171,7 +169,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
       child: Stack(
         children: [
           Positioned(
-            child: getContentWidget(context),
+            child: setCustomerPageContent(context) ?? setPageContent(context),
           ),
           if (_isErrorWidgetShow)
             Positioned(
@@ -202,10 +200,14 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
-  /// 不使用封装的错误,空白,加载中控件时重写这个方法
-  Widget buildCustomerPage() => null;
+  Widget _buildCustomerPageLayout(Widget content) {
+    if (content == null) return null;
+    return Container(
+      child: content,
+    );
+  }
 
-  /// 使用封装的错误,空白,加载中等控件时重写[getPage][getContentWidget],使用后可在页面中直接调用或重写
+  /// 不使用Scaffold时重写,页面中可调用或重写
   /// [setErrorContent] - 重写自定义错误控件
   /// [setErrorWidgetVisible] - 控制错误控件显示
   /// [setEmptyWidgetVisible] -  控制空白控件显示
@@ -216,16 +218,41 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   /// [finishDartPageOrApp] - 退出flutterEngine
   /// 等方法.....
   ///
-  /// - getPage中返回页面布局推荐使用Scaffold,可添加AppBar,fab,bottomNav等
-  /// - getContentWidget中返回页面具体内容,最后这个方法的返回会作为getPage中的参数传入,
-  ///   推荐在getPage中返回Scaffold时用做body的值
-  Widget getPage(Widget content) {
+  /// [setCustomerPageContent]返回null时页面显示[setPageContent]返回内容,
+  /// [setCustomerPageContent]返回不为null时[setPageContent]不生效
+  Widget setCustomerPageContent(BuildContext context) => null;
+
+  Widget _buildPageLayout(Widget content) {
     return Scaffold(
+      key: baseScaffoldKey,
+      appBar: appBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
+      floatingActionButtonAnimator: floatingActionButtonAnimator,
+      persistentFooterButtons: persistentFooterButtons,
+      drawer: drawer,
+      endDrawer: endDrawer,
+      bottomNavigationBar: bottomNavigationBar,
+      bottomSheet: bottomSheet,
+      backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      primary: primary ?? true,
+      drawerDragStartBehavior:
+          drawerDragStartBehavior ?? DragStartBehavior.start,
+      extendBody: extendBody ?? false,
+      extendBodyBehindAppBar: extendBodyBehindAppBar ?? false,
+      drawerScrimColor: drawerScrimColor,
+      drawerEdgeDragWidth: drawerEdgeDragWidth,
+      drawerEnableOpenDragGesture: drawerEnableOpenDragGesture ?? true,
+      endDrawerEnableOpenDragGesture: endDrawerEnableOpenDragGesture ?? true,
       body: content,
     );
   }
 
-  /// 使用封装的错误,空白,加载中等控件时重写[getPage][getContentWidget],使用后可在页面中直接调用或重写
+  /// 使用Scaffold时重写,返回为Scaffold的body,
+  /// Scaffold其他参数重写[BaseScaffold]对应字段getter方法.
+  ///
+  /// 页面中可调用或重写
   /// [setErrorContent] - 重写自定义错误控件
   /// [setErrorWidgetVisible] - 控制错误控件显示
   /// [setEmptyWidgetVisible] -  控制空白控件显示
@@ -236,10 +263,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   /// [finishDartPageOrApp] - 退出flutterEngine
   /// 等方法.....
   ///
-  /// - getPage中返回页面布局推荐使用Scaffold,可添加AppBar,fab,bottomNav等
-  /// - getContentWidget中返回页面具体内容,最后这个方法的返回会作为getPage中的参数传入,
-  ///   推荐在getPage中返回Scaffold时用做body的值
-  Widget getContentWidget(BuildContext context) => null;
+  /// [setCustomerPageContent]返回null时页面显示[setPageContent]返回内容,
+  /// [setCustomerPageContent]返回不为null时[setPageContent]不生效
+  Widget setPageContent(BuildContext context) => Container();
 
   /// 重写添加build方法return前需要执行的逻辑
   void buildBeforeReturn() {}

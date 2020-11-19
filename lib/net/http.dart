@@ -10,6 +10,8 @@ class HttpUtil {
 
   Dio _dio;
 
+  HttpController _controller;
+
   static HttpUtil getInstance({String baseUrl}) {
     if (baseUrl == null) {
       return _instance._normal();
@@ -29,8 +31,10 @@ class HttpUtil {
   //一般请求，默认域名
   HttpUtil _normal() {
     if (_dio != null) {
-      if (_dio.options.baseUrl != Configuration().getConfiguration<String>(NATIVE_API_HOST)) {
-        _dio.options.baseUrl = Configuration().getConfiguration<String>(NATIVE_API_HOST);
+      if (_dio.options.baseUrl !=
+          Configuration().getConfiguration<String>(NATIVE_API_HOST)) {
+        _dio.options.baseUrl =
+            Configuration().getConfiguration<String>(NATIVE_API_HOST);
       }
     }
     return this;
@@ -38,6 +42,7 @@ class HttpUtil {
 
   HttpUtil._internal() {
     Configuration configuration = Configuration();
+    _controller = HttpController();
     BaseOptions options = BaseOptions(
       baseUrl: configuration.getConfiguration<String>(NATIVE_API_HOST),
       connectTimeout: configuration.getConfiguration<int>(CONNECT_TIMEOUT),
@@ -56,17 +61,17 @@ class HttpUtil {
       _dio.interceptors.add(DioLogInterceptor());
     }
     // 配置拦截器
-    _dio.interceptors.addAll(
-        configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR));
+    _dio.interceptors
+        .addAll(configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR));
 
-    _dio.interceptors.add(connectionStatus);
+    _dio.interceptors.add(ConnectionStatusInterceptor(_controller));
   }
 
   void cancelRequest(String tokenName) {
     _cancelTokens[tokenName].cancel("cancelled");
   }
 
-  HttpController httpController() => controller;
+  HttpController httpController() => _controller;
 
   void removeCancelToken(BuildContext context) {
     _cancelTokens.remove(_getCancelToken(context));
@@ -142,294 +147,5 @@ class HttpUtil {
       cancelToken: _getCancelToken(context),
     );
     return response;
-  }
-}
-
-// 异常处理
-class ErrorEntity implements Exception {
-  int code;
-  String message;
-
-  ErrorEntity({this.code, this.message});
-
-  String toString() {
-    if (message == null) return "Exception";
-    return "Exception: code $code, $message";
-  }
-}
-
-ErrorEntity createErrorEntity(DioError error) {
-  switch (error.type) {
-    case DioErrorType.CANCEL:
-      {
-        return ErrorEntity(code: -1, message: "请求取消");
-      }
-      break;
-    case DioErrorType.CONNECT_TIMEOUT:
-      {
-        return ErrorEntity(code: -1, message: "连接超时");
-      }
-      break;
-    case DioErrorType.SEND_TIMEOUT:
-      {
-        return ErrorEntity(code: -1, message: "请求超时");
-      }
-      break;
-    case DioErrorType.RECEIVE_TIMEOUT:
-      {
-        return ErrorEntity(code: -1, message: "响应超时");
-      }
-      break;
-    case DioErrorType.RESPONSE:
-      {
-        try {
-          int errCode = error.response.statusCode;
-          switch (errCode) {
-            case 400:
-              {
-                return ErrorEntity(code: errCode, message: "请求语法错误");
-              }
-              break;
-            case 401:
-              {
-                return ErrorEntity(code: errCode, message: "没有权限");
-              }
-              break;
-            case 403:
-              {
-                return ErrorEntity(code: errCode, message: "服务器拒绝执行");
-              }
-              break;
-            case 404:
-              {
-                return ErrorEntity(code: errCode, message: "无法连接服务器");
-              }
-              break;
-            case 405:
-              {
-                return ErrorEntity(code: errCode, message: "请求方法被禁止");
-              }
-              break;
-            case 500:
-              {
-                return ErrorEntity(code: errCode, message: "服务器内部错误");
-              }
-              break;
-            case 502:
-              {
-                return ErrorEntity(code: errCode, message: "无效的请求");
-              }
-              break;
-            case 503:
-              {
-                return ErrorEntity(code: errCode, message: "服务器挂了");
-              }
-              break;
-            case 505:
-              {
-                return ErrorEntity(code: errCode, message: "不支持HTTP协议请求");
-              }
-              break;
-            default:
-              {
-                // return ErrorEntity(code: errCode, message: "未知错误");
-                return ErrorEntity(
-                    code: errCode, message: error.response.statusMessage);
-              }
-          }
-        } on Exception catch (_) {
-          return ErrorEntity(code: -1, message: "未知错误");
-        }
-      }
-      break;
-    default:
-      {
-        return ErrorEntity(code: -1, message: error.message);
-      }
-  }
-}
-
-InterceptorsWrapper log = InterceptorsWrapper(
-  onRequest: (RequestOptions options) {
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_BEGIN,
-      text: '${options.method} >>> ${options.path}',
-    );
-    LogUtil.logDebug(tag: LogUtil.TAG_HTTP_URL, text: options.uri.toString());
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_PARAM,
-      text: options.method == 'GET'
-          ? options.queryParameters.toString()
-          : options.data.toString(),
-    );
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_HEAD,
-      text: options.headers.toString(),
-    );
-    return options;
-  },
-  onResponse: (Response response) {
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_RESPONSE,
-      text: response.data.toString(),
-    );
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_END,
-      text: '${response.statusCode} >>> ${response.statusMessage}',
-    );
-    return response; // continue
-  },
-  onError: (DioError e) {
-    LogUtil.logDebug(
-      tag: LogUtil.TAG_HTTP_END,
-      text: '${e.response.statusCode} >>> ${e.message}',
-    );
-  },
-);
-
-HttpController controller = HttpController();
-
-InterceptorsWrapper connectionStatus = InterceptorsWrapper(
-  onRequest: (RequestOptions options) {
-    controller.startLoading();
-    return options;
-  },
-  onResponse: (Response response) {
-    controller.onSuccess();
-    return response;
-  },
-  onError: (DioError e) {
-    controller.onError(e);
-  },
-);
-
-///日志拦截器
-class DioLogInterceptor extends InterceptorsWrapper {
-  @override
-  Future onRequest(RequestOptions options) async {
-    String requestStr = "\n==================== REQUEST ====================\n"
-        "- URL:\n${options.baseUrl + options.path}\n"
-        "- METHOD: ${options.method}\n";
-
-    requestStr += "- HEADER:\n${options.headers.mapToStructureString()}\n";
-
-    final data = options.data;
-    if (data != null) {
-      if (data is Map)
-        requestStr += "- BODY:\n${data.mapToStructureString()}\n";
-      else if (data is FormData) {
-        final formDataMap = Map()
-          ..addEntries(data.fields)
-          ..addEntries(data.files);
-        requestStr += "- BODY:\n${formDataMap.mapToStructureString()}\n";
-      } else
-        requestStr += "- BODY:\n${data.toString()}\n";
-    }
-    print(requestStr);
-    return options;
-  }
-
-  @override
-  Future onError(DioError err) async {
-    String errorStr = "\n==================== RESPONSE ====================\n"
-        "- URL:\n${err.request.baseUrl + err.request.path}\n"
-        "- METHOD: ${err.request.method}\n";
-
-    errorStr +=
-        "- HEADER:\n${err.response?.headers?.map?.mapToStructureString()??'head'}\n";
-    if (err.response != null && err.response.data != null) {
-      print('╔ ${err.type.toString()}');
-      errorStr += "- ERROR:\n${_parseResponse(err.response)}\n";
-    } else {
-      errorStr += "- ERRORTYPE: ${err.type}\n";
-      errorStr += "- MSG: ${err.message}\n";
-    }
-    print(errorStr);
-    return err;
-  }
-
-  @override
-  Future onResponse(Response response) async {
-    String responseStr =
-        "\n==================== RESPONSE ====================\n"
-        "- URL:\n${response.request.uri}\n";
-    responseStr += "- HEADER:\n{";
-    response.headers.forEach(
-        (key, list) => responseStr += "\n  " + "\"$key\" : \"$list\",");
-    responseStr += "\n}\n";
-    responseStr += "- STATUS: ${response.statusCode}\n";
-
-    if (response.data != null) {
-      responseStr += "- BODY:\n ${_parseResponse(response)}";
-    }
-    printWrapped(responseStr);
-    return response;
-  }
-
-  void printWrapped(String text) {
-    final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
-    pattern.allMatches(text).forEach((match) => print(match.group(0)));
-  }
-
-  String _parseResponse(Response response) {
-    String responseStr = "";
-    var data = response.data;
-    if (data is Map)
-      responseStr += data.mapToStructureString();
-    else if (data is List)
-      responseStr += data.listToStructureString();
-    else
-      responseStr += response.data.toString();
-
-    return responseStr;
-  }
-}
-
-extension Map2StringEx on Map {
-  String mapToStructureString({int indentation = 2}) {
-    String result = "";
-    String indentationStr = " " * indentation;
-    if (true) {
-      result += "{";
-      this.forEach((key, value) {
-        if (value is Map) {
-          var temp = value.mapToStructureString(indentation: indentation + 2);
-          result += "\n$indentationStr" + "\"$key\" : $temp,";
-        } else if (value is List) {
-          result += "\n$indentationStr" +
-              "\"$key\" : ${value.listToStructureString(indentation: indentation + 2)},";
-        } else {
-          result += "\n$indentationStr" + "\"$key\" : \"$value\",";
-        }
-      });
-      result = result.substring(0, result.length - 1);
-      result += indentation == 2 ? "\n}" : "\n${" " * (indentation - 1)}}";
-    }
-
-    return result;
-  }
-}
-
-extension List2StringEx on List {
-  String listToStructureString({int indentation = 2}) {
-    String result = "";
-    String indentationStr = " " * indentation;
-    if (true) {
-      result += "$indentationStr[";
-      this.forEach((value) {
-        if (value is Map) {
-          var temp = value.mapToStructureString(indentation: indentation + 2);
-          result += "\n$indentationStr" + "\"$temp\",";
-        } else if (value is List) {
-          result += value.listToStructureString(indentation: indentation + 2);
-        } else {
-          result += "\n$indentationStr" + "\"$value\",";
-        }
-      });
-      result = result.substring(0, result.length - 1);
-      result += "\n$indentationStr]";
-    }
-
-    return result;
   }
 }
