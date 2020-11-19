@@ -54,6 +54,8 @@ dev_dependencies:
 
   build_runner: ^1.10.0
 
+  test: ^1.15.5
+
 flutter:
 
   uses-material-design: true
