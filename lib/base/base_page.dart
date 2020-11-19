@@ -134,7 +134,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
-  // 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法
+  /// 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法,默认true
   Future<bool> onBackPressed() async => true;
 
   /// 点击页面收起键盘
@@ -147,6 +147,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     ) : _buildProviderWrapper(context);
   }
 
+  /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
   bool canClickPageHideKeyboard() => false;
 
   /// 封装状态管理组件
@@ -204,7 +205,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   /// 不使用封装的错误,空白,加载中控件时重写这个方法
   Widget buildCustomerPage() => null;
 
-  /// 使用封装的错误,空白,加载中等控件时重写以下两个方法,使用后可在页面中直接调用或重写
+  /// 使用封装的错误,空白,加载中等控件时重写[getPage][getContentWidget],使用后可在页面中直接调用或重写
   /// [setErrorContent] - 重写自定义错误控件
   /// [setErrorWidgetVisible] - 控制错误控件显示
   /// [setEmptyWidgetVisible] -  控制空白控件显示
@@ -224,6 +225,20 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
+  /// 使用封装的错误,空白,加载中等控件时重写[getPage][getContentWidget],使用后可在页面中直接调用或重写
+  /// [setErrorContent] - 重写自定义错误控件
+  /// [setErrorWidgetVisible] - 控制错误控件显示
+  /// [setEmptyWidgetVisible] -  控制空白控件显示
+  /// [setLoadingWidgetVisible] - 控制加载中控件显示
+  /// [setEmptyWidgetContent] - 重写自定义空白控件
+  /// [setErrorImage] - 设置错误图片
+  /// [setEmptyImage] - 设置空白图片
+  /// [finishDartPageOrApp] - 退出flutterEngine
+  /// 等方法.....
+  ///
+  /// - getPage中返回页面布局推荐使用Scaffold,可添加AppBar,fab,bottomNav等
+  /// - getContentWidget中返回页面具体内容,最后这个方法的返回会作为getPage中的参数传入,
+  ///   推荐在getPage中返回Scaffold时用做body的值
   Widget getContentWidget(BuildContext context) => null;
 
   /// 重写添加build方法return前需要执行的逻辑

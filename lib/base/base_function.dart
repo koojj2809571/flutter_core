@@ -246,17 +246,14 @@ abstract class BaseFunction {
     }
   }
 
-  ///初始化一些变量 相当于android onCreate ， 放一下 初始化数据操作
+  ///初始化一些变量 相当于android onCreate,初始化数据操作
   void onCreate();
 
-  ///相当于onResume, 只要页面来到栈顶， 都会调用此方法，网络请求可以放在这个方法
+  ///相当于onResume,只要页面来到栈顶,都会调用此方法,网络请求可以放在这个方法
   void onResume();
 
   ///页面被覆盖,暂停
   void onPause();
-
-  ///返回UI控件 相当于setContentView()
-  Widget buildWidget(BuildContext context);
 
   ///app切回到后台
   void onBackground() {
