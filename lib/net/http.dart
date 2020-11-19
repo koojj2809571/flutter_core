@@ -1,14 +1,40 @@
 part of flutter_core;
+
 class HttpUtil {
   static HttpUtil _instance = HttpUtil._internal();
 
   factory HttpUtil() => _instance;
 
   static Map<String, CancelToken> _cancelTokens =
-  new Map<String, CancelToken>();
+      new Map<String, CancelToken>();
 
-  Dio dio;
-  HttpController controller;
+  Dio _dio;
+
+  static HttpUtil getInstance({String baseUrl}) {
+    if (baseUrl == null) {
+      return _instance._normal();
+    } else {
+      return _instance._baseUrl(baseUrl);
+    }
+  }
+
+  //用于指定特定域名
+  HttpUtil _baseUrl(String baseUrl) {
+    if (_dio != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
+    return this;
+  }
+
+  //一般请求，默认域名
+  HttpUtil _normal() {
+    if (_dio != null) {
+      if (_dio.options.baseUrl != Configuration().getConfiguration<String>(NATIVE_API_HOST)) {
+        _dio.options.baseUrl = Configuration().getConfiguration<String>(NATIVE_API_HOST);
+      }
+    }
+    return this;
+  }
 
   HttpUtil._internal() {
     Configuration configuration = Configuration();
@@ -16,22 +42,24 @@ class HttpUtil {
       baseUrl: configuration.getConfiguration<String>(NATIVE_API_HOST),
       connectTimeout: configuration.getConfiguration<int>(CONNECT_TIMEOUT),
       receiveTimeout: configuration.getConfiguration<int>(RECEIVE_TIMEOUT),
-      headers: configuration.getConfiguration<Map<String,String>>(INITIAL_HEADERS),
-
+      headers:
+          configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS),
       contentType: Headers.formUrlEncodedContentType,
-
       responseType: ResponseType.json,
     );
 
-    dio = new Dio(options);
+    _dio = new Dio(options);
 
     // 添加拦截器
     // 日志拦截器
-    if(configuration.getConfiguration<bool>(IS_PRINT)){
-      dio.interceptors.add(log);
+    if (configuration.getConfiguration<bool>(IS_PRINT)) {
+      _dio.interceptors.add(log);
     }
     // 配置拦截器
-    dio.interceptors.addAll(configuration.getConfiguration<List<InterceptorsWrapper>>(INTERCEPTOR));
+    _dio.interceptors.addAll(
+        configuration.getConfiguration<List<InterceptorsWrapper>>(INTERCEPTOR));
+
+    _dio.interceptors.add(connectionStatus);
   }
 
   void cancelRequest(String tokenName) {
@@ -40,16 +68,16 @@ class HttpUtil {
 
   HttpController httpController() => controller;
 
-  void removeCancelToken(BuildContext context){
+  void removeCancelToken(BuildContext context) {
     _cancelTokens.remove(_getCancelToken(context));
   }
 
-  CancelToken _getCancelToken(BuildContext context){
+  CancelToken _getCancelToken(BuildContext context) {
     CancelToken cancelToken;
-    if(!_cancelTokens.containsKey(context.toString())) {
+    if (!_cancelTokens.containsKey(context.toString())) {
       cancelToken = CancelToken();
       _cancelTokens[context.toString()] = cancelToken;
-    }else{
+    } else {
       cancelToken = _cancelTokens[context.toString()];
     }
     return cancelToken;
@@ -62,6 +90,35 @@ class HttpUtil {
   /// cacheKey 缓存key
   /// cacheDisk 是否磁盘缓存
   Future get(
+    String path, {
+    @required BuildContext context,
+    dynamic params,
+    Options options,
+    String otherBaseUrl,
+    bool refresh = false,
+    bool list = false,
+    String cacheKey,
+    bool cacheDisk = false,
+  }) async {
+    Options requestOptions = options ?? Options();
+    requestOptions = requestOptions.merge(extra: {
+      "context": context,
+      "refresh": refresh,
+      "list": list,
+      "cacheKey": cacheKey,
+      "cacheDisk": cacheDisk,
+    });
+    var response = await _dio.get(
+      path,
+      queryParameters: params,
+      options: requestOptions,
+      cancelToken: _getCancelToken(context),
+    );
+    return response;
+  }
+
+  /// restful post 操作
+  Future post(
     String path, {
     @required BuildContext context,
     dynamic params,
@@ -79,44 +136,13 @@ class HttpUtil {
       "cacheKey": cacheKey,
       "cacheDisk": cacheDisk,
     });
-    var response = await dio.get(
-      path,
-      queryParameters: params,
-      options: requestOptions,
-      cancelToken: _getCancelToken(context),
-    );
-    HttpResponse sourceRes = HttpResponse.fromJson(response.data);
-
-    if (sourceRes.success) {
-      return sourceRes.data;
-    } else {
-      throw Exception([sourceRes.message]);
-    }
-  }
-
-  /// restful post 操作
-  Future post(
-    String path, {
-    @required BuildContext context,
-    dynamic params,
-    Options options,
-  }) async {
-    Options requestOptions = options ?? Options();
-    requestOptions = requestOptions.merge(extra: {
-      "context": context,
-    });
-    var response = await dio.post(
+    var response = await _dio.post(
       path,
       data: params,
       options: requestOptions,
       cancelToken: _getCancelToken(context),
     );
-    HttpResponse sourceRes = HttpResponse.fromJson(response.data);
-    if (sourceRes.success) {
-      return sourceRes.data;
-    } else {
-      throw Exception([sourceRes.message]);
-    }
+    return response;
   }
 }
 
@@ -232,8 +258,7 @@ InterceptorsWrapper log = InterceptorsWrapper(
       tag: LogUtil.TAG_HTTP_BEGIN,
       text: '${options.method} >>> ${options.path}',
     );
-    LogUtil.logDebug(
-        tag: LogUtil.TAG_HTTP_URL, text: options.uri.toString());
+    LogUtil.logDebug(tag: LogUtil.TAG_HTTP_URL, text: options.uri.toString());
     LogUtil.logDebug(
       tag: LogUtil.TAG_HTTP_PARAM,
       text: options.method == 'GET'
@@ -244,7 +269,7 @@ InterceptorsWrapper log = InterceptorsWrapper(
       tag: LogUtil.TAG_HTTP_HEAD,
       text: options.headers.toString(),
     );
-    return options; //continue
+    return options;
   },
   onResponse: (Response response) {
     LogUtil.logDebug(
@@ -268,15 +293,15 @@ InterceptorsWrapper log = InterceptorsWrapper(
 HttpController controller = HttpController();
 
 InterceptorsWrapper connectionStatus = InterceptorsWrapper(
-  onRequest: (RequestOptions options){
+  onRequest: (RequestOptions options) {
     controller.startLoading();
     return options;
   },
-  onResponse: (Response response){
+  onResponse: (Response response) {
     controller.onSuccess();
     return response;
   },
-  onError: (DioError e){
+  onError: (DioError e) {
     controller.onError(e);
   },
 );

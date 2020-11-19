@@ -35,9 +35,13 @@ const String CONTENT_TYPE = 'CONTENT_TYPE';
 /// -如果想以文本(字符串)格式接收响应数据，请使用 `PLAIN`.
 const String RESPONSE_TYPE = 'RESPONSE_TYPE';
 
+/// BaseUrl集合
+const String BASE_URL_MAP = 'BASE_URL_MAP';
+
 class Configuration{
   static const Map<String,dynamic> CONFIGURATION = {};
   static const List<Interceptor> INTERCEPTORS = [];
+  static const Map<String,String> BASE_URLS = {};
 
   factory Configuration() =>_getInstance();
   static Configuration get instance => _getInstance();
@@ -94,6 +98,16 @@ class Configuration{
   void setInterceptors(List<InterceptorsWrapper> interceptors){
     INTERCEPTORS.addAll(interceptors);
     CONFIGURATION[INTERCEPTOR] = INTERCEPTORS;
+  }
+
+  void addBaseUrl(String urlName,String url){
+    BASE_URLS[urlName] = url;
+    CONFIGURATION[BASE_URL_MAP] = BASE_URLS;
+  }
+
+  void setBaseUrlMap(Map<String,String> baseUrls){
+    BASE_URLS.addAll(baseUrls);
+    CONFIGURATION[BASE_URL_MAP] = BASE_URLS;
   }
 
   T getConfiguration<T>(String key) {

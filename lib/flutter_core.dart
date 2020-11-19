@@ -40,7 +40,6 @@ part 'util/data_util.dart';
 /// 网络请求模块
 part 'net/http.dart';
 part 'net/http_controller.dart';
-part 'net/http_response.dart';
 
 /// 常用控件模块
 part 'widgets/popup/message_dialog.dart';
