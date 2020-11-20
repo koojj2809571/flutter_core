@@ -51,10 +51,13 @@ abstract class BasePageState<T extends BasePage> extends State<T>
 
   @override
   void deactivate() {
-    // 以下场景调用该方法:
+    // 以下场景调用该方法:以HomePage(第一页),NextPage(第二页)为例
     // -当前路由栈中入栈其他页面,当前页面在栈中位置是第二个,也就是当前页面被移除屏幕显示的时候
+    // >> NextPage(initState) -> NextPage(didChangeDependencies) -> NextPage(build) -> HomePage(deactivate) -> HomePage(build)
     // -当前页面在栈中位置是第二个,当栈顶页面被弹出栈,当前页面重回栈顶
+    // >> HomePage(deactivate) -> HomePage(build) -> NextPage(deactivate) -> NextPage(dispose)
     // -当前页面被弹出栈
+    // >> HomePage(deactivate) -> HomePage(dispose)
     if (NavigatorManger().isSecondTop(this)) {
       // 当前页面不在栈顶
       if (!_onPause) {
@@ -62,7 +65,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
         _onPause = true;
       } else {
         onResume();
-        _onResumed = false;
+        _onPause = false;
       }
     }
     if (NavigatorManger().isTopPage(this)) {
