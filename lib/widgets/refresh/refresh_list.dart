@@ -11,7 +11,6 @@ class RefreshList<R> extends StatefulWidget {
   final EasyRefreshController controller;
   final NotifyAfterRefresh notify;
   final Widget empty;
-  final Widget error;
 
   RefreshList({
     this.param,
@@ -21,7 +20,6 @@ class RefreshList<R> extends StatefulWidget {
     this.controller,
     this.notify,
     this.empty,
-    this.error,
   });
 
   @override

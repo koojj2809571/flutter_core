@@ -10,10 +10,10 @@ class SearchChoiceItem{
   SearchChoiceItem({this.id, this.isSelected, this.name, this.head, this.introduction});
 
   factory SearchChoiceItem.fromSearchItem(ISearchItem item) => SearchChoiceItem(
-    id: item.getId(),
+    id: item.getSearchId(),
     isSelected: false,
-    name: item.getName(),
-    head: item.getHead(),
-    introduction: item.getIntroduction(),
+    name: item.getSearchName(),
+    head: item.getSearchHead(),
+    introduction: item.getSearchIntroduction(),
   );
 }

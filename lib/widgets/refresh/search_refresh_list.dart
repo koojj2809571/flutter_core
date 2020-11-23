@@ -7,6 +7,7 @@ class SearchRefreshListPage<T> extends StatefulWidget {
   final Function itemWidget;
   final Function itemClick;
   final Function onSearch;
+  final Function backClick;
   final EasyRefreshController controller;
   final String searchHint;
   final bool hasDropdownButton;
@@ -20,6 +21,7 @@ class SearchRefreshListPage<T> extends StatefulWidget {
     this.itemWidget,
     this.itemClick,
     this.onSearch,
+    this.backClick,
     this.controller,
     this.searchHint: '输入关键字搜索',
     this.hasDropdownButton: false,
@@ -67,9 +69,7 @@ class _SearchRefreshListPageState<T> extends State<SearchRefreshListPage> {
           Icons.arrow_back,
           color: Colors.black,
         ),
-        onPressed: () {
-          ExtendedNavigator.root.pop();
-        },
+        onPressed: widget.backClick,
       ),
       title: Row(
         children: <Widget>[

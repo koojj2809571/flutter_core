@@ -106,18 +106,6 @@ abstract class BaseFunction {
     );
   }
 
-  void clickAppBarBack() {
-    finish();
-  }
-
-  void finish<T extends Object>([T result]) {
-    if (ExtendedNavigator.root.canPop()) {
-      ExtendedNavigator.root.pop<T>(result);
-    } else {
-      finishDartPageOrApp();
-    }
-  }
-
   Widget getEmptyWidget() {
     return Container(
       //错误页面中心可以自己调整

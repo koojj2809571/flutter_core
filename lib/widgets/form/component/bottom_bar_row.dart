@@ -15,15 +15,17 @@ Widget getButtonBarRow({
         isBasic
             ? Expanded(
                 flex: 1,
-                child: jyFlatButton(
+                child: Container(
                   height: 40.h,
-                  click: () => switchPage(),
-                  color: theme,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(0)),
+                  child: FlatButton(
+                    onPressed: () => switchPage(),
+                    child:
+                        Text('提交客源基本信息', style: TextStyle(color: Colors.white)),
+                    color: theme,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(0)),
+                    ),
                   ),
-                  child:
-                      Text('提交客源基本信息', style: TextStyle(color: Colors.white)),
                 ),
               )
             : Container(),
@@ -31,16 +33,15 @@ Widget getButtonBarRow({
             ? Container()
             : Expanded(
                 flex: 1,
-                child: jyFlatButton(
-                  height: 40.w,
-                  click: () => switchPage(),
-                  color: theme,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(0)),
-                  ),
-                  child: Text(
-                    '上一步',
-                    style: TextStyle(color: Colors.white),
+                child: Container(
+                  height: 40.h,
+                  child: FlatButton(
+                    onPressed: () => switchPage(),
+                    child: Text('上一步', style: TextStyle(color: Colors.white)),
+                    color: theme,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(0)),
+                    ),
                   ),
                 ),
               ),
@@ -48,13 +49,16 @@ Widget getButtonBarRow({
             ? Container()
             : Expanded(
                 flex: 1,
-                child: jyFlatButton(
-                  height: 40.w,
-                  click: submit,
-                  color: okTheme,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(0))),
-                  child: Text('完成', style: TextStyle(color: Colors.white)),
+                child: Container(
+                  height: 40.h,
+                  child: FlatButton(
+                    onPressed: submit,
+                    child: Text('完成', style: TextStyle(color: Colors.white)),
+                    color: okTheme,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(0)),
+                    ),
+                  ),
                 ),
               ),
       ],

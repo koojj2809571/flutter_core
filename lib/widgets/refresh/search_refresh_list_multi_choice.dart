@@ -1,20 +1,24 @@
 part of flutter_core;
 
-typedef Widget SearchItem(
-    SearchChoiceItem item, Map<int, SearchChoiceItem> selectedItem);
-
 class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
-  final List<int> selectedIds;
+  final Map<int, String> selectedIds;
   final BasePageRequest param;
   final SendRequest<BasePageResponse<T>> sendRequest;
-  final SearchItem itemWidget;
+  final Function itemWidget;
   final Function okClick;
-  final EasyRefreshController controller;
+  final Function backClick;
+  final EasyRefreshController refreshCtr;
   final String searchHint;
   final bool canLoadMore;
+  final GlobalKey stackKey;
+  final bool hasFilter;
+  final List<FilterHeaderItem> filterTitleItems;
+  final FilterController filterCtr;
+  final List<FilterMenuBuilder> filterMenus;
   final NotifyAfterRefresh notify;
   final Color theme;
   final Color okColor;
+  final Widget empty;
 
   SearchListMultiChoice({
     this.selectedIds,
@@ -22,13 +26,39 @@ class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
     this.sendRequest,
     this.itemWidget,
     this.okClick,
-    this.controller,
+    this.backClick,
+    this.refreshCtr,
     this.searchHint: '相关数据',
     this.canLoadMore: false,
     this.notify,
     this.theme,
     this.okColor,
-  });
+    this.empty,
+  })  : this.hasFilter = false,
+        this.stackKey = null,
+        this.filterTitleItems = null,
+        this.filterCtr = null,
+        this.filterMenus = null;
+
+  SearchListMultiChoice.withFilter(
+      this.stackKey,
+      this.filterTitleItems,
+      this.filterCtr,
+      this.filterMenus, {
+        this.selectedIds,
+        this.param,
+        this.sendRequest,
+        this.itemWidget,
+        this.okClick,
+        this.backClick,
+        this.refreshCtr,
+        this.searchHint: '相关数据',
+        this.canLoadMore: false,
+        this.notify,
+        this.theme,
+        this.okColor,
+        this.empty,
+      }) : this.hasFilter = true;
 
   @override
   _SearchListMultiChoiceState createState() => _SearchListMultiChoiceState<T>();
@@ -36,31 +66,29 @@ class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
 
 class _SearchListMultiChoiceState<T extends ISearchItem>
     extends State<SearchListMultiChoice> {
-  List<SearchChoiceItem> searchItemList;
+  List<T> searchItemList;
   TextEditingController searchCtr;
   BasePageRequest param;
   SendRequest<BasePageResponse<T>> sendRequest;
-  Map<int, SearchChoiceItem> selectedItem = {};
   EasyRefreshController refreshController;
+  Map<int, String> selectedIds;
 
   @override
   void initState() {
     super.initState();
-    refreshController = EasyRefreshController();
+    refreshController = widget.refreshCtr ?? EasyRefreshController();
     sendRequest = widget.sendRequest;
     searchCtr = TextEditingController();
     param = widget.param;
     searchItemList = [];
-    widget.selectedIds.forEach((element) {
-      selectedItem[element] = SearchChoiceItem();
-    });
+    selectedIds = widget.selectedIds;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: _selectContent(),
+      body: widget.hasFilter ? _withFilterSelectContent() : _selectContent(),
       floatingActionButton: _okButton(),
     );
   }
@@ -73,9 +101,7 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
           Icons.arrow_back,
           color: Colors.black,
         ),
-        onPressed: () {
-          ExtendedNavigator.root.pop({'result': false});
-        },
+        onPressed: widget.backClick,
       ),
       title: TextField(
         controller: searchCtr,
@@ -115,6 +141,47 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
     );
   }
 
+  Widget _withFilterSelectContent() {
+    return Stack(
+      key: widget.stackKey,
+      children: [
+        Column(
+          children: [
+            FilterBar(
+              height: 50.h,
+              stackKey: widget.stackKey,
+              items: widget.filterTitleItems,
+              controller: widget.filterCtr,
+              onItemTap: (index) {},
+              style: TextStyle(color: Color(0xFF666666), fontSize: 14),
+              dividerColor: Colors.white,
+              dropDownStyle: TextStyle(
+                fontSize: 14,
+                color: widget.theme,
+              ),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(color: Colors.white),
+                child: _refreshContentList(),
+              ),
+            )
+          ],
+        ),
+        FilterMenu(
+          controller: widget.filterCtr,
+          dropdownMenuChanging: (isShow, index) {
+            setState(() {});
+          },
+          dropdownMenuChanged: (isShow, index) {
+            setState(() {});
+          },
+          menus: widget.filterMenus,
+        ),
+      ],
+    );
+  }
+
   Widget _selectContent() {
     return Container(
       decoration: BoxDecoration(color: Colors.white),
@@ -129,24 +196,15 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
         Icons.check,
         size: 30.w,
       ),
-      backgroundColor: widget.okColor,
-      onPressed: () {
-        List<int> idResults = [];
-        List<String> nameResults = [];
-        selectedItem.values.forEach((element) {
-          idResults.add(element.id);
-          nameResults.add(element.name);
-        });
-        ExtendedNavigator.root
-            .pop({'result': true, 'ids': idResults, 'names': nameResults});
-      },
+      backgroundColor: Colors.lightGreen,
+      onPressed: widget.okClick,
     );
   }
 
   Widget _refreshContentList() {
     return EasyRefresh.custom(
       emptyWidget: searchItemList == null || searchItemList.length == 0
-          ? Container()
+          ? widget.empty ?? Container()
           : null,
       firstRefresh: true,
       firstRefreshWidget: Container(
@@ -164,10 +222,13 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
         await sendRequest().then((value) {
           if(widget.notify != null) widget.notify(value);
           setState(() {
-            searchItemList = value
-                .valueList()
-                .map((e) => SearchChoiceItem.fromSearchItem(e))
-                .toList();
+            searchItemList = value?.valueList()?.map((T item) {
+              if (selectedIds.keys.contains(item.getSearchId())) {
+                item.setSearchSelected(true);
+              }
+              return item;
+            })?.toList() ??
+                [];
           });
           refreshController.finishRefresh(success: true);
         }).catchError((onError) {
@@ -178,15 +239,19 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
           });
         });
       },
-      onLoad: widget.canLoadMore ? () async {
+      onLoad: widget.canLoadMore
+          ? () async {
         LogUtil.logDebug(text: '执行load');
         param.setPage(param.valuePage() + 1);
         await sendRequest().then((value) {
           setState(() {
-            searchItemList.addAll(value
-                ?.valueList()
-                ?.map((e) => SearchChoiceItem.fromSearchItem(e))
-                ?.toList());
+            searchItemList.addAll(value?.valueList()?.map((T item) {
+              if (selectedIds.keys.contains(item.getSearchId())) {
+                item.setSearchSelected(true);
+              }
+              return item;
+            })?.toList() ??
+                []);
           });
           refreshController.finishLoad(
             success: true,
@@ -198,38 +263,41 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
             this.searchItemList = null;
           });
         });
-      } : null,
+      }
+          : null,
       slivers: _slivers(),
     );
   }
 
-  List<Widget> _slivers(){
+  List<Widget> _slivers() {
     List<Widget> slivers = [];
-    if(searchItemList.length != 0 || selectedItem.length != 0){
+    if (searchItemList.length != 0 || selectedIds.length != 0) {
       slivers.add(SliverGrid.extent(
         maxCrossAxisExtent: 120.w,
         childAspectRatio: 2,
         children: _selectedItems(),
       ));
     }
-    slivers.add(SliverList(
-      delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-          return Container(
-            child: searchItemList == null
-                ? Container()
-                : widget.itemWidget(searchItemList[index], selectedItem),
-          );
-        },
-        childCount: searchItemList != null ? searchItemList.length : 0,
+    slivers.add(
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+              (context, index) {
+            return Container(
+              child: searchItemList == null
+                  ? Container()
+                  : widget.itemWidget(searchItemList[index], selectedIds),
+            );
+          },
+          childCount: searchItemList != null ? searchItemList.length : 0,
+        ),
       ),
-    ));
+    );
     return slivers;
   }
 
   List<Widget> _selectedItems() {
-    return selectedItem.values.toList().map(
-      (e) {
+    return selectedIds.keys.toList().map(
+          (id) {
         return Container(
           margin: EdgeInsets.symmetric(
             horizontal: 5.w,
@@ -238,19 +306,23 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
           child: OutlineButton(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10))),
-            borderSide: BorderSide(color: widget.theme, width: 1.w),
+            borderSide: BorderSide(color: widget.theme, width: 1),
             onPressed: () {
-              setState(() {
-                selectedItem.remove(e.id);
-                searchItemList.forEach((element) {
-                  if (element.id == e.id) {
-                    element.isSelected = false;
-                  }},
-                );
-              });
+              setState(
+                    () {
+                  selectedIds.remove(id);
+                  searchItemList.forEach(
+                        (ISearchItem element) {
+                      if (element.getSearchId() == id) {
+                        element.setSearchSelected(false);
+                      }
+                    },
+                  );
+                },
+              );
             },
             child: Text(
-              e.name,
+              selectedIds[id],
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
