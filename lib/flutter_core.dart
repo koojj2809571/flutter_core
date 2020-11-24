@@ -22,6 +22,10 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 // 统一依赖第三方库
 export 'package:flutter_screenutil/flutter_screenutil.dart';
 export 'package:provider/provider.dart';
+export 'package:flutter_easyrefresh/easy_refresh.dart';
+export 'package:fluttertoast/fluttertoast.dart';
+export 'package:smooth_star_rating/smooth_star_rating.dart';
+export 'package:dio/dio.dart';
 
 // 基类模块
 part 'base/base_page.dart';
