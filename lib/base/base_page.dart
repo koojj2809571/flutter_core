@@ -36,7 +36,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     initBaseCommon(this);
     NavigatorManger().addWidget(this);
     WidgetsBinding.instance.addObserver(this);
-    if(isAutoHandleHttpResult()) {
+    if(_isAutoHandleHttpResult()) {
       HttpUtil().httpController().addListener(_onController);
     }
     LogUtil.logDebug(tag: '当前页面 =====>', text: widget.pagePath);
@@ -46,10 +46,22 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   }
 
   void _onController() {
-    if (isAutoHandleHttpResult()) {
-      setEmptyWidgetVisible(HttpUtil().httpController().isEmpty);
-      setErrorWidgetVisible(HttpUtil().httpController().isError);
-      setLoadingWidgetVisible(HttpUtil().httpController().isLoading);
+    if (_isAutoHandleHttpResult()) {
+      if(isAutoHandleHttpEmpty()) {
+        setEmptyWidgetVisible(HttpUtil()
+            .httpController()
+            .isEmpty);
+      }
+      if(isAutoHandleHttpError()) {
+        setErrorWidgetVisible(HttpUtil()
+            .httpController()
+            .isError);
+      }
+      if(isAutoHandleHttpLoading()) {
+        setLoadingWidgetVisible(HttpUtil()
+            .httpController()
+            .isLoading);
+      }
     }
   }
 
@@ -241,6 +253,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
+  /// 是否自动处理网络请求对应页面展示
+  bool _isAutoHandleHttpResult() => isAutoHandleHttpLoading() || isAutoHandleHttpError() || isAutoHandleHttpEmpty();
+
   /*------------------------------------ 子类实现方法 ------------------------------------*/
 
   /// 重写修改顶部状态栏文字颜色
@@ -251,8 +266,14 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   /// 是否在销毁时取消页面请求
   bool isCancelRequestWhenDispose() => false;
 
-  /// 是否自动处理网络请求对应页面展示
-  bool isAutoHandleHttpResult() => false;
+  /// 是否自动处理网络请求加载
+  bool isAutoHandleHttpLoading() => false;
+
+  /// 是否自动处理网络请求响应空数据
+  bool isAutoHandleHttpEmpty() => false;
+
+  /// 是否自动处理网络请求响应错误
+  bool isAutoHandleHttpError() => false;
 
   /// 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法,默认true
   Future<bool> onBackPressed() async => true;
