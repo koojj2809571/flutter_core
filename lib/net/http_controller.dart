@@ -10,14 +10,19 @@ class HttpController extends ChangeNotifier{
 
   void startLoading(){
     isLoading = true;
+    isError = false;
+    isEmpty = false;
+    errorMessage = '';
+    notifyListeners();
+  }
+
+  void stopLoading(){
+    isLoading = false;
     notifyListeners();
   }
 
   void onSuccess(){
     isLoading = false;
-    isError = false;
-    isEmpty = false;
-    errorMessage = '';
     notifyListeners();
   }
 

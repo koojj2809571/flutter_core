@@ -1,5 +1,11 @@
 part of flutter_core;
 
+/// 错误图片路径
+const String ERROR_IMAGE_PATH = 'ERROR_IMAGE_PATH';
+
+/// 空数据图片路径
+const String EMPTY_IMAGE_PATH = 'EMPTY_IMAGE_PATH';
+
 /// 是否打印网络日志
 const String IS_PRINT = 'IS_PRINT';
 
@@ -57,6 +63,8 @@ class Configuration{
     configurations[CONTENT_TYPE] = Headers.formUrlEncodedContentType;
     configurations[RESPONSE_TYPE] = ResponseType.json;
     configurations[BASE_URL_MAP] = {};
+    configurations[ERROR_IMAGE_PATH] = '';
+    configurations[EMPTY_IMAGE_PATH] = '';
   }
   static Configuration _getInstance() {
     if (_instance == null) {
@@ -115,6 +123,14 @@ class Configuration{
   void setBaseUrlMap(Map<String,String> baseUrls){
     baseUrlMap.addAll(baseUrls);
     configurations[BASE_URL_MAP] = baseUrlMap;
+  }
+
+  void setErrorImage(String path){
+    configurations[ERROR_IMAGE_PATH] = path;
+  }
+
+  void setEmptyImage(String path){
+    configurations[EMPTY_IMAGE_PATH] = path;
   }
 
   T getConfiguration<T>(String key) {

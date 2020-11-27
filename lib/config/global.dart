@@ -2,7 +2,7 @@ part of flutter_core;
 
 class Global{
   /// 用户配置
-  static Map<String,dynamic> profileMap;
+  static Map<String,dynamic> profileMap = {};
 
   /// 是否 ios
   static bool isIOS = Platform.isIOS;

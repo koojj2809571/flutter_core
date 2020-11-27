@@ -13,7 +13,7 @@ class NavigatorManger {
   }
 
   void removeWidget(BasePageState baseState) {
-    HttpUtil().removeCancelToken(baseState.context);
+    HttpUtil(). removeCancelToken(baseState.context);
     _activityStack.remove(baseState.getWidgetName());
   }
 

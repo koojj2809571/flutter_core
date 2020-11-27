@@ -1,8 +1,8 @@
 part of flutter_core;
 
 // ignore: must_be_immutable
-abstract class BaseComponents extends StatefulWidget {
-  BaseFragmentState baseComponentsState;
+abstract class BaseFragment extends StatefulWidget {
+  BaseComponentsState baseComponentsState;
   String componentPath;
 
   BaseComponents(){
@@ -16,17 +16,17 @@ abstract class BaseComponents extends StatefulWidget {
   }
 
   @override
-  BaseFragmentState createState() {
+  BaseComponentsState createState() {
     baseComponentsState = getState();
     return baseComponentsState;
   }
 
-  BaseFragmentState getState();
+  BaseComponentsState getState();
 
   String getStateName() => baseComponentsState.getWidgetName();
 }
 
-abstract class BaseFragmentState<T extends BaseComponents> extends State<T> {
+abstract class BaseComponentsState<T extends BaseComponents> extends State<T> {
 
   State state;
   BuildContext rootContext;

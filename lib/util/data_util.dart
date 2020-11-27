@@ -2,19 +2,20 @@ part of flutter_core;
 
 ///各数据类型功能封装
 
-extension StringUtil on String{
+extension StringUtil on String {
   /// 非空判断包含null
   bool get empty => this == null || this.isEmpty;
+
   /// 非空判断包含空格
   bool get blank => this.empty || this.trim().isEmpty;
 }
 
-extension NumberUtil on num{
+extension NumberUtil on num {
   /// 非空判断包含null
   bool get empty => this == null;
 }
 
-extension ListUtil on List{
+extension ListUtil on List {
   /// 非空判断包含null
   bool get empty => this == null || this.isEmpty;
 
@@ -22,8 +23,8 @@ extension ListUtil on List{
   String listToStructureString({int indentation = 2}) {
     String result = "";
     String indentationStr = " " * indentation;
-    if (true) {
-      result += "$indentationStr[";
+    result += "$indentationStr[";
+    if(this.isNotEmpty) {
       this.forEach((value) {
         if (value is Map) {
           var temp = value.mapToStructureString(indentation: indentation + 2);
@@ -35,14 +36,14 @@ extension ListUtil on List{
         }
       });
       result = result.substring(0, result.length - 1);
-      result += "\n$indentationStr]";
     }
+    result += "\n$indentationStr]";
 
     return result;
   }
 }
 
-extension MapUtil on Map{
+extension MapUtil on Map {
   /// 非空判断包含null
   bool get empty => this == null || this.isEmpty;
 
@@ -50,28 +51,29 @@ extension MapUtil on Map{
   String mapToStructureString({int indentation = 2}) {
     String result = "";
     String indentationStr = " " * indentation;
-    if (true) {
-      result += "{";
+    result += "{";
+    if(this.isNotEmpty) {
       this.forEach((key, value) {
         if (value is Map) {
           var temp = value.mapToStructureString(indentation: indentation + 2);
           result += "\n$indentationStr" + "\"$key\" : $temp,";
         } else if (value is List) {
           result += "\n$indentationStr" +
-              "\"$key\" : ${value.listToStructureString(indentation: indentation + 2)},";
+              "\"$key\" : ${value.listToStructureString(
+                  indentation: indentation + 2)},";
         } else {
           result += "\n$indentationStr" + "\"$key\" : \"$value\",";
         }
       });
       result = result.substring(0, result.length - 1);
-      result += indentation == 2 ? "\n}" : "\n${" " * (indentation - 1)}}";
     }
+    result += indentation == 2 ? "\n}" : "\n${" " * (indentation - 1)}}";
 
     return result;
   }
 }
 
-extension BoolUtil on bool{
+extension BoolUtil on bool {
   /// 非空判断包含null
   bool get empty => this == null;
 }

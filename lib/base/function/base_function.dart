@@ -4,13 +4,11 @@ abstract class BaseFunction {
   State _stateBaseFunction;
   BuildContext _contextBaseFunction;
 
-  bool _isErrorWidgetShow = false; //错误信息是否显示
-
-  Color _appBarColor = Colors.blue;
+  bool _isErrorWidgetShow = false;
 
   String _errorContentMessage = "网络错误啦~~~";
 
-  String _errImgPath = "images/load_error_view.png";
+  String _errImgPath = Configuration().getConfiguration<String>(ERROR_IMAGE_PATH);
 
   bool _isLoadingWidgetShow = false;
 
@@ -18,7 +16,7 @@ abstract class BaseFunction {
 
   String _emptyWidgetContent = "暂无数据~";
 
-  String _emptyImgPath = "images/ic_empty.png"; //自己根据需求变更
+  String _emptyImgPath = Configuration().getConfiguration<String>(EMPTY_IMAGE_PATH);
 
   FontWeight _fontWidget = FontWeight.w600; //错误页面和空页面的字体粗度
 
@@ -64,11 +62,12 @@ abstract class BaseFunction {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image(
-                image: AssetImage(_errImgPath),
-                width: 150,
-                height: 150,
-              ),
+              if (!_errImgPath.empty)
+                Image(
+                  image: AssetImage(_errImgPath),
+                  width: 150,
+                  height: 150,
+                ),
               Container(
                 margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text(
@@ -85,22 +84,19 @@ abstract class BaseFunction {
     );
   }
 
-  ///点击错误页面后展示内容
+  ///点击错误页面后执行逻辑
   void onClickErrorWidget() {
-    onResume(); //此处 默认onResume 就是 调用网络请求，
   }
 
   Widget getLoadingWidget() {
     return Container(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 100),
       color: Colors.black12,
       width: double.infinity,
       height: double.infinity,
-      child: Center(
-        child: new CircularProgressIndicator(
-          strokeWidth: 4.0,
-          backgroundColor: Colors.blue,
-          valueColor: new AlwaysStoppedAnimation<Color>(_appBarColor),
+      child: Container(
+        color: Colors.black12,
+        child: Center(
+          child: CupertinoActivityIndicator(),
         ),
       ),
     );
@@ -119,12 +115,13 @@ abstract class BaseFunction {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image(
-                color: Colors.black12,
-                image: AssetImage(_emptyImgPath),
-                width: 150,
-                height: 150,
-              ),
+              if (!_emptyImgPath.empty)
+                Image(
+                  color: Colors.black12,
+                  image: AssetImage(_emptyImgPath),
+                  width: 150,
+                  height: 150,
+                ),
               Container(
                 margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text(_emptyWidgetContent,
@@ -232,30 +229,6 @@ abstract class BaseFunction {
         });
       }
     }
-  }
-
-  ///初始化一些变量 相当于android onCreate,初始化数据操作
-  void onCreate();
-
-  ///相当于onResume,只要页面来到栈顶,都会调用此方法,网络请求可以放在这个方法
-  void onResume();
-
-  ///页面被覆盖,暂停
-  void onPause();
-
-  ///app切回到后台
-  void onBackground() {
-    LogUtil.logDebug(text: "回到后台");
-  }
-
-  ///app切回到前台
-  void onForeground() {
-    LogUtil.logDebug(text: "回到前台");
-  }
-
-  ///页面注销方法
-  void onDestroy() {
-    LogUtil.logDebug(text: "销毁");
   }
 
   ///弹对话框

@@ -5,14 +5,16 @@ class HttpUtil {
 
   factory HttpUtil() => _instance;
 
-  static Map<String, CancelToken> _cancelTokens =
-      new Map<String, CancelToken>();
+  static Map<String, CancelToken> _cancelTokens = <String, CancelToken>{};
 
   Dio _dio;
 
   HttpController _controller;
 
   static HttpUtil getInstance({String baseUrl}) {
+    if(_instance == null){
+      return HttpUtil._internal();
+    }
     if (baseUrl == null) {
       return _instance._normal();
     } else {
@@ -43,12 +45,12 @@ class HttpUtil {
   HttpUtil._internal() {
     Configuration configuration = Configuration();
     _controller = HttpController();
+    Map<String, String> headers = configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS);
     BaseOptions options = BaseOptions(
       baseUrl: configuration.getConfiguration<String>(NATIVE_API_HOST),
       connectTimeout: configuration.getConfiguration<int>(CONNECT_TIMEOUT),
       receiveTimeout: configuration.getConfiguration<int>(RECEIVE_TIMEOUT),
-      headers:
-          configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS),
+      headers: headers.isEmpty ? null : headers,
       contentType: configuration.getConfiguration<String>(CONTENT_TYPE),
       responseType: configuration.getConfiguration<ResponseType>(RESPONSE_TYPE),
     );
@@ -60,14 +62,14 @@ class HttpUtil {
     if (configuration.getConfiguration<bool>(IS_PRINT)) {
       _dio.interceptors.add(DioLogInterceptor());
     }
+    _dio.interceptors.add(ConnectionStatusInterceptor(_controller));
     // 配置拦截器
     _dio.interceptors
         .addAll(configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR));
-
-    _dio.interceptors.add(ConnectionStatusInterceptor(_controller));
   }
 
   void cancelRequest(String tokenName) {
+    tokenName = tokenName.split('(')[0];
     _cancelTokens[tokenName].cancel("cancelled");
   }
 
@@ -79,11 +81,12 @@ class HttpUtil {
 
   CancelToken _getCancelToken(BuildContext context) {
     CancelToken cancelToken;
-    if (!_cancelTokens.containsKey(context.toString())) {
+    String cancelTokenKey = context.toString().split('(')[0];
+    if (!_cancelTokens.containsKey(cancelTokenKey)) {
       cancelToken = CancelToken();
-      _cancelTokens[context.toString()] = cancelToken;
+      _cancelTokens[cancelTokenKey] = cancelToken;
     } else {
-      cancelToken = _cancelTokens[context.toString()];
+      cancelToken = _cancelTokens[cancelTokenKey];
     }
     return cancelToken;
   }
@@ -118,7 +121,7 @@ class HttpUtil {
       options: requestOptions,
       cancelToken: _getCancelToken(context),
     );
-    return response;
+    return response.data;
   }
 
   /// restful post 操作
@@ -146,6 +149,6 @@ class HttpUtil {
       options: requestOptions,
       cancelToken: _getCancelToken(context),
     );
-    return response;
+    return response.data;
   }
 }

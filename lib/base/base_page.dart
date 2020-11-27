@@ -3,6 +3,17 @@ part of flutter_core;
 // ignore: must_be_immutable
 abstract class BasePage extends StatefulWidget {
   BasePageState basePageState;
+  String pagePath;
+
+  BasePage(){
+    if(Config.debug) {
+      String className = this.toString();
+      String path = StackTrace.current.toString().split(className)[1];
+      path = path.split(')')[0];
+      path = path.split('(')[1];
+      pagePath = '$className: ($path)';
+    }
+  }
 
   @override
   BasePageState createState() {
@@ -16,19 +27,19 @@ abstract class BasePage extends StatefulWidget {
 }
 
 abstract class BasePageState<T extends BasePage> extends State<T>
-    with WidgetsBindingObserver, BaseFunction, BaseScaffold {
+    with WidgetsBindingObserver, BaseFunction, LifeCircle, BaseScaffold {
   bool _onResumed = false; //页面展示标记
   bool _onPause = false; //页面暂停标记
-
-  SystemUiOverlayStyle get statusMode => SystemUiOverlayStyle.light;
 
   @override
   void initState() {
     initBaseCommon(this);
     NavigatorManger().addWidget(this);
     WidgetsBinding.instance.addObserver(this);
-    LogUtil.logDebug(tag: '当前页面 =====>', text: getWidgetName());
-    HttpUtil().httpController().addListener(_onController);
+    if(isAutoHandleHttpResult()) {
+      HttpUtil().httpController().addListener(_onController);
+    }
+    LogUtil.logDebug(tag: '当前页面 =====>', text: widget.pagePath);
     onCreate();
     if (mounted) {}
     super.initState();
@@ -41,8 +52,6 @@ abstract class BasePageState<T extends BasePage> extends State<T>
       setLoadingWidgetVisible(HttpUtil().httpController().isLoading);
     }
   }
-
-  bool isAutoHandleHttpResult() => false;
 
   @override
   void didChangeDependencies() {
@@ -101,7 +110,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     _onPause = false;
 
     // 取消网络请求
-    HttpUtil().cancelRequest(context.toString());
+    if(isCancelRequestWhenDispose()) {
+      HttpUtil().cancelRequest(context.toString());
+    }
     NavigatorManger().removeWidget(this);
     super.dispose();
   }
@@ -131,9 +142,6 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
-  /// 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法,默认true
-  Future<bool> onBackPressed() async => true;
-
   /// 点击页面收起键盘
   Widget _buildAutoHideKeyboardWrapper(BuildContext context) {
     return canClickPageHideKeyboard()
@@ -145,9 +153,6 @@ abstract class BasePageState<T extends BasePage> extends State<T>
           )
         : _buildProviderWrapper(context);
   }
-
-  /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
-  bool canClickPageHideKeyboard() => false;
 
   /// 封装状态管理组件
   Widget _buildProviderWrapper(BuildContext context) {
@@ -161,18 +166,17 @@ abstract class BasePageState<T extends BasePage> extends State<T>
             _buildPageLayout(_buildContentWrapper(context));
   }
 
-  /// 重写添加状态管理的provider
-  List<SingleChildWidget> getProvider() {
-    return null;
-  }
-
   /// 封装错误,空白,加载中组件
   Widget _buildContentWrapper(BuildContext context) {
     return Container(
       child: Stack(
         children: [
           Positioned(
-            child: setCustomerPageContent(context) ?? setPageContent(context),
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: setCustomerPageContent(context: context) ?? setPageContent(context),
           ),
           if (_isErrorWidgetShow)
             Positioned(
@@ -204,26 +208,11 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   }
 
   Widget _buildCustomerPageLayout(Widget content) {
-    if (content == null) return null;
+    if (setCustomerPageContent() == null) return null;
     return Container(
       child: content,
     );
   }
-
-  /// 不使用Scaffold时重写,页面中可调用或重写
-  /// [setErrorContent] - 重写自定义错误控件
-  /// [setErrorWidgetVisible] - 控制错误控件显示
-  /// [setEmptyWidgetVisible] -  控制空白控件显示
-  /// [setLoadingWidgetVisible] - 控制加载中控件显示
-  /// [setEmptyWidgetContent] - 重写自定义空白控件
-  /// [setErrorImage] - 设置错误图片
-  /// [setEmptyImage] - 设置空白图片
-  /// [finishDartPageOrApp] - 退出flutterEngine
-  /// 等方法.....
-  ///
-  /// [setCustomerPageContent]返回null时页面显示[setPageContent]返回内容,
-  /// [setCustomerPageContent]返回不为null时[setPageContent]不生效
-  Widget setCustomerPageContent(BuildContext context) => null;
 
   Widget _buildPageLayout(Widget content) {
     return Scaffold(
@@ -251,6 +240,45 @@ abstract class BasePageState<T extends BasePage> extends State<T>
       body: content,
     );
   }
+
+  /*------------------------------------ 子类实现方法 ------------------------------------*/
+
+  /// 重写修改顶部状态栏文字颜色
+  /// [SystemUiOverlayStyle.light]-白色文本图标
+  /// [SystemUiOverlayStyle.dark]-黑色文本图标
+  SystemUiOverlayStyle get statusMode => SystemUiOverlayStyle.light;
+
+  /// 是否在销毁时取消页面请求
+  bool isCancelRequestWhenDispose() => false;
+
+  /// 是否自动处理网络请求对应页面展示
+  bool isAutoHandleHttpResult() => false;
+
+  /// 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法,默认true
+  Future<bool> onBackPressed() async => true;
+
+  /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
+  bool canClickPageHideKeyboard() => false;
+
+  /// 重写添加状态管理的provider
+  List<SingleChildWidget> getProvider() {
+    return null;
+  }
+
+  /// 不使用Scaffold时重写,页面中可调用或重写
+  /// [setErrorContent] - 重写自定义错误控件
+  /// [setErrorWidgetVisible] - 控制错误控件显示
+  /// [setEmptyWidgetVisible] -  控制空白控件显示
+  /// [setLoadingWidgetVisible] - 控制加载中控件显示
+  /// [setEmptyWidgetContent] - 重写自定义空白控件
+  /// [setErrorImage] - 设置错误图片
+  /// [setEmptyImage] - 设置空白图片
+  /// [finishDartPageOrApp] - 退出flutterEngine
+  /// 等方法.....
+  ///
+  /// [setCustomerPageContent]返回null时页面显示[setPageContent]返回内容,
+  /// [setCustomerPageContent]返回不为null时[setPageContent]不生效
+  Widget setCustomerPageContent({BuildContext context}) => null;
 
   /// 使用Scaffold时重写,返回为Scaffold的body,
   /// Scaffold其他参数重写[BaseScaffold]对应字段getter方法.

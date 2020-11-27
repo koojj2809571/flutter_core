@@ -2,6 +2,7 @@ library flutter_core;
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,11 +29,13 @@ export 'package:smooth_star_rating/smooth_star_rating.dart';
 export 'package:dio/dio.dart';
 
 // 基类模块
+part 'base/function/base_function.dart';
+part 'base/function/navigator_manager.dart';
+part 'base/function/life_circle.dart';
 part 'base/base_page.dart';
 part 'base/base_scaffold.dart';
 part 'base/base_components.dart';
-part 'base/base_function.dart';
-part 'base/navigator_manager.dart';
+part 'base/base_fragment.dart';
 
 // 工具模块
 part 'util/storage.dart';

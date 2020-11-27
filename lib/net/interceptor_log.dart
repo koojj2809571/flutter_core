@@ -5,22 +5,23 @@ class DioLogInterceptor extends InterceptorsWrapper {
   @override
   Future onRequest(RequestOptions options) async {
     String requestStr = "\n==================== REQUEST ====================\n"
-        "- URL:\n${options.baseUrl + options.path}\n"
+        "- URI:\n${options.uri}\n"
         "- METHOD: ${options.method}\n";
 
     requestStr += "- HEADER:\n${options.headers.mapToStructureString()}\n";
 
     final data = options.data;
     if (data != null) {
-      if (data is Map)
+      if (data is Map) {
         requestStr += "- BODY:\n${data.mapToStructureString()}\n";
-      else if (data is FormData) {
+      } else if (data is FormData) {
         final formDataMap = Map()
           ..addEntries(data.fields)
           ..addEntries(data.files);
         requestStr += "- BODY:\n${formDataMap.mapToStructureString()}\n";
-      } else
+      } else {
         requestStr += "- BODY:\n${data.toString()}\n";
+      }
     }
     print(requestStr);
     return options;
@@ -28,15 +29,15 @@ class DioLogInterceptor extends InterceptorsWrapper {
 
   @override
   Future onError(DioError err) async {
-    String errorStr = "\n==================== RESPONSE ====================\n"
+    String errorStr = "\n==================== RESPONSE-ERROR ====================\n"
         "- URL:\n${err.request.baseUrl + err.request.path}\n"
         "- METHOD: ${err.request.method}\n";
 
     errorStr +=
     "- HEADER:\n${err.response?.headers?.map?.mapToStructureString()??'head'}\n";
     if (err.response != null && err.response.data != null) {
-      print('╔ ${err.type.toString()}');
-      errorStr += "- ERROR:\n${_parseResponse(err.response)}\n";
+      print('╔ ${err.toString()}');
+      errorStr += "- ERROR:\n${ErrorEntity.createByDioError(err)}\n";
     } else {
       errorStr += "- ERRORTYPE: ${err.type}\n";
       errorStr += "- MSG: ${err.message}\n";
@@ -57,7 +58,7 @@ class DioLogInterceptor extends InterceptorsWrapper {
     responseStr += "- STATUS: ${response.statusCode}\n";
 
     if (response.data != null) {
-      responseStr += "- BODY:\n ${_parseResponse(response)}";
+      responseStr += "- BODY:\n${_parseResponse(response)}";
     }
     printWrapped(responseStr);
     return response;
