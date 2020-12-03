@@ -151,4 +151,32 @@ class HttpUtil {
     );
     return response.data;
   }
+
+  /// restful delete 操作
+  Future delete(
+      String path, {
+        @required BuildContext context,
+        dynamic params,
+        Options options,
+        bool refresh = false,
+        bool list = false,
+        String cacheKey,
+        bool cacheDisk = false,
+      }) async {
+    Options requestOptions = options ?? Options();
+    requestOptions = requestOptions.merge(extra: {
+      "context": context,
+      "refresh": refresh,
+      "list": list,
+      "cacheKey": cacheKey,
+      "cacheDisk": cacheDisk,
+    });
+    var response = await _dio.delete(
+      path,
+      data: params,
+      options: requestOptions,
+      cancelToken: _getCancelToken(context),
+    );
+    return response.data;
+  }
 }
