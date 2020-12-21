@@ -86,7 +86,14 @@ class Configuration{
   }
 
   void setHost(String host){
-    configurations[NATIVE_API_HOST] = host;
+    if(baseUrlMap.empty){
+      throw Exception("BaseUrl未配置");
+    }
+    if(baseUrlMap[host] == null){
+      throw Exception("未配置 $host URL");
+    }
+    String baseUrl = baseUrlMap[host];
+    configurations[NATIVE_API_HOST] = baseUrl;
   }
 
   void setContentType(String type){
