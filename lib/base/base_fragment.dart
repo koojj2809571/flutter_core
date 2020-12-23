@@ -2,10 +2,10 @@ part of flutter_core;
 
 // ignore: must_be_immutable
 abstract class BaseFragment extends StatefulWidget {
-  BaseComponentsState baseComponentsState;
+  BaseFragmentState baseComponentsState;
   String componentPath;
 
-  BaseComponents(){
+  BaseFragment(){
     if(Config.debug) {
       String className = this.toString();
       String path = StackTrace.current.toString().split(className)[1];
@@ -16,17 +16,17 @@ abstract class BaseFragment extends StatefulWidget {
   }
 
   @override
-  BaseComponentsState createState() {
+  BaseFragmentState createState() {
     baseComponentsState = getState();
     return baseComponentsState;
   }
 
-  BaseComponentsState getState();
+  BaseFragmentState getState();
 
   String getStateName() => baseComponentsState.getWidgetName();
 }
 
-abstract class BaseComponentsState<T extends BaseComponents> extends State<T> {
+abstract class BaseFragmentState<T extends BaseFragment> extends State<T> {
 
   State state;
   BuildContext rootContext;
@@ -34,7 +34,7 @@ abstract class BaseComponentsState<T extends BaseComponents> extends State<T> {
   @override
   void initState() {
     super.initState();
-    LogUtil.logDebug(tag: '组件 =====>', text: widget.componentPath);
+    LogUtil.logDebug(tag: '碎片 =====>', text: widget.componentPath);
   }
 
   @override
