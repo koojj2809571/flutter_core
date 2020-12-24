@@ -3,14 +3,16 @@ part of flutter_core;
 Widget getLabel(
   String label,
   bool canEmpty,
+ {double fontSize = 14,
+ Color textColor = Colors.black}
 ) {
   return Text.rich(
     TextSpan(
-      style: TextStyle(fontSize: 14.w, color: Colors.black),
+      style: TextStyle(fontSize: fontSize, color: textColor),
       children: [
+        TextSpan(text: canEmpty ? '' : '*', style: TextStyle(color: Colors.red)),
         TextSpan(text: label),
-        TextSpan(
-            text: canEmpty ? '' : '*', style: TextStyle(color: Colors.red)),
+
       ],
     ),
   );

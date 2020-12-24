@@ -19,6 +19,8 @@ class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
   final Color theme;
   final Color okColor;
   final Widget empty;
+  final int min;
+  final int max;
 
   SearchListMultiChoice({
     this.selectedIds,
@@ -34,6 +36,8 @@ class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
     this.theme,
     this.okColor,
     this.empty,
+    this.min,
+    this.max
   })  : this.hasFilter = false,
         this.stackKey = null,
         this.filterTitleItems = null,
@@ -58,6 +62,8 @@ class SearchListMultiChoice<T extends ISearchItem> extends StatefulWidget {
         this.theme,
         this.okColor,
         this.empty,
+        this.min ,
+        this.max
       }) : this.hasFilter = true;
 
   @override
@@ -271,7 +277,7 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
 
   List<Widget> _slivers() {
     List<Widget> slivers = [];
-    if (searchItemList.length != 0 || selectedIds.length != 0) {
+    if ((searchItemList !=null && searchItemList.length != 0) || selectedIds.length != 0) {
       slivers.add(SliverGrid.extent(
         maxCrossAxisExtent: 120.w,
         childAspectRatio: 2,
@@ -283,9 +289,9 @@ class _SearchListMultiChoiceState<T extends ISearchItem>
         delegate: SliverChildBuilderDelegate(
               (context, index) {
             return Container(
-              child: searchItemList == null
+              child: searchItemList == null || searchItemList.length == 0
                   ? Container()
-                  : widget.itemWidget(searchItemList[index], selectedIds),
+                  : widget.itemWidget(searchItemList[index], selectedIds,widget.max),
             );
           },
           childCount: searchItemList != null ? searchItemList.length : 0,

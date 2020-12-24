@@ -7,77 +7,93 @@ const MULTI_CHOICE_TYPE = 'MULTI_CHOICE_TYPE';
 const DATE_TIME_TYPE = 'DATE_TIME_TYPE';
 const GO_NEW_PAGE = 'go_new_page';
 
+enum SelectType {
+
+  SINGLE_COLUMN_SELECT_TYPE,
+
+  MULTI_COLUMN_SELECT_TYPE,
+
+  ARRAY_COLUMN_SELECT_TYPE,
+
+  MULTI_CHOICE_TYPE,
+
+  DATE_TIME_TYPE,
+
+  GO_NEW_PAGE,
+
+}
+
 Widget getSelectRow({
   String label,
-  bool canEmpty,
-  bool withDivider,
+  bool canEmpty = true,
+  bool withDivider = false,
   String selectedItem,
-  String selectType,
+  SelectType selectType,
   Function onSelect,
   BuildContext context,
   List data,
   String datas,
   GlobalKey<ScaffoldState> key,
+  double height,
+  double fontSize,
+  Color textColor,
+  Color hintColor = Colors.white12,
 }) {
   return Column(
     children: <Widget>[
       Container(
-        padding: EdgeInsets.symmetric(vertical: 20.h),
-        child: Flex(
-          direction: Axis.horizontal,
+        // padding: EdgeInsets.only(top: 20, bottom: 20),
+        height: height,
+        alignment: Alignment.center,
+        child:
+        Row(
           children: <Widget>[
+            getLabel(label, canEmpty,textColor: textColor,fontSize: fontSize ??14.w),
+            SizedBox(width: 20,),
             Expanded(
-              flex: 0,
-              child: getLabel(label, canEmpty),
-            ),
-            Expanded(
-              flex: 1,
               child: InkWell(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Container(
-                      alignment: Alignment.centerRight,
-                      width: MediaQuery.of(context).size.width / 3,
-                      child: Text(
-                        selectedItem ?? '请选择',
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: selectedItem == '请选择'
-                              ? Colors.black12
-                              : Colors.black,
-                        ),
+                    Expanded(child:Text(
+                      selectedItem ?? '请选择',
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: fontSize ??14.w,
+                        // fontWeight: FontWeight.bold,
+                        color: selectedItem != null ? textColor : hintColor,
                       ),
+                    ),
                     ),
                     Icon(
                       Icons.navigate_next,
-                      color: Colors.black12,
+                      color:textColor,
                     ),
                   ],
                 ),
                 onTap: () {
                   switch (selectType) {
-                    case SINGLE_COLUMN_SELECT_TYPE:
+                    case SelectType.SINGLE_COLUMN_SELECT_TYPE:
                       showPickerModal(context, data, onSelect);
                       break;
-                    case MULTI_COLUMN_SELECT_TYPE:
+                    case SelectType.MULTI_COLUMN_SELECT_TYPE:
                       showPickerModalRange(context, data, onSelect);
                       break;
-                    case MULTI_CHOICE_TYPE:
+                    case SelectType.MULTI_CHOICE_TYPE:
                       showMultiChoiceBottomSheet(context, data).then((value) {
                         if (value != null) {
                           onSelect(value);
                         }
                       });
                       break;
-                    case ARRAY_COLUMN_SELECT_TYPE:
+                    case SelectType.ARRAY_COLUMN_SELECT_TYPE:
                       showPickerArray(context, datas, onSelect);
                       break;
-                    case GO_NEW_PAGE:
+                    case SelectType.GO_NEW_PAGE:
                       onSelect();
                       break;
-                    case DATE_TIME_TYPE:
+                    case SelectType.DATE_TIME_TYPE:
                       showPickerDateTime(context, onSelect);
                       break;
                   }
@@ -89,7 +105,7 @@ Widget getSelectRow({
       ),
       withDivider
           ? Divider(
-        height: 1.h,
+        height: 1,
         color: Colors.black12,
       )
           : Container(),
