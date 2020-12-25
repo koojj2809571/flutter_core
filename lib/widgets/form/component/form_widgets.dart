@@ -41,12 +41,13 @@ void showPickerModal(BuildContext context, List data, Function onConfirm) {
 
 void showPickerModalRange(BuildContext context, List data, Function onConfirm) {
   Picker(
-    adapter: PickerDataAdapter<String>(pickerdata: data),
+    adapter: PickerDataAdapter<String>(pickerdata: data,isArray: true),
     changeToFirst: true,
     hideHeader: false,
     cancelText: '取消',
     confirmText: '确定 ',
     onConfirm: onConfirm,
+
   ).showModal(context); //_scaffoldKey.currentState);
 }
 

@@ -49,7 +49,7 @@ Widget getSelectRow({
         Row(
           children: <Widget>[
             getLabel(label, canEmpty,textColor: textColor,fontSize: fontSize ??14.w),
-            SizedBox(width: 20,),
+            SizedBox(width: 20.w,),
             Expanded(
               child: InkWell(
                 child: Row(
@@ -67,7 +67,8 @@ Widget getSelectRow({
                     ),
                     ),
                     Icon(
-                      Icons.navigate_next,
+                      Icons.keyboard_arrow_down,
+                      size: 20.h,
                       color:textColor,
                     ),
                   ],
