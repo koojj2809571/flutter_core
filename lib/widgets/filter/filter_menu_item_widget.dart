@@ -83,8 +83,8 @@ Widget conditionGrid<T>(
                 margin: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   color: item.isSelected
-                      ? theme.withAlpha(50)
-                      : Colors.black.withAlpha(20),
+                      ? theme
+                      : Colors.black54,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
                 alignment: Alignment.center,
@@ -302,8 +302,8 @@ class _ButtonWrapState extends State<ButtonWrap> {
             margin: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
               color: item.isSelected
-                  ? theme.withAlpha(50)
-                  : Colors.black.withAlpha(20),
+                  ? theme
+                  : Colors.black54,
               borderRadius: BorderRadius.all(Radius.circular(4)),
             ),
             alignment: Alignment.center,
