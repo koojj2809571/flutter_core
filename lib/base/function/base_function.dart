@@ -96,7 +96,7 @@ abstract class BaseFunction {
       child: Container(
         color: Colors.black12,
         child: Center(
-          child: CupertinoActivityIndicator(),
+          child: CupertinoActivityIndicator(radius: 15),
         ),
       ),
     );
@@ -188,7 +188,6 @@ abstract class BaseFunction {
 
   void setLoadingWidgetVisible(bool isVisible) {
     if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
-      // ignore: invalid_use_of_protected_member
       _stateBaseFunction.setState(() {
         _isLoadingWidgetShow = isVisible;
       });
@@ -295,5 +294,26 @@ abstract class BaseFunction {
       backColor: backColor,
       textColor: textColor,
     );
+  }
+
+  void showLoading() {
+    showDialog(
+      context: _contextBaseFunction,
+      builder: (BuildContext context) {
+        return Material(
+          color: Colors.black.withOpacity(0.05),
+          child: WillPopScope(
+            child: Center(
+              child: CupertinoActivityIndicator(radius: 40,),
+            ),
+            onWillPop: () => Future.value(false),
+          ),
+        );
+      },
+    );
+  }
+
+  void stopLoading() {
+    Navigator.of(_contextBaseFunction).pop();
   }
 }
