@@ -27,7 +27,7 @@ abstract class BasePage extends StatefulWidget {
 }
 
 abstract class BasePageState<T extends BasePage> extends State<T>
-    with WidgetsBindingObserver, BaseFunction, LifeCircle, BaseScaffold {
+    with WidgetsBindingObserver, BaseFunction, LifeCircle, BaseScaffold, AutomaticKeepAliveClientMixin {
   bool _onResumed = false; //页面展示标记
   bool _onPause = false; //页面暂停标记
 
@@ -101,6 +101,10 @@ abstract class BasePageState<T extends BasePage> extends State<T>
 
   @override
   Widget build(BuildContext context) {
+    if(isKeepAlive()){
+      super.build(context);
+    }
+    buildBeforeReturn(context);
     // 调用场景与deactivate类似, 区别在于每次调用setState后该方法也会被调用
     if (!_onResumed) {
       if (NavigatorManger().isTopPage(this)) {
@@ -108,7 +112,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
         onResume();
       }
     }
-    buildBeforeReturn();
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusMode,
       child: _buildOnBackPressedWrapper(context),
@@ -254,6 +258,10 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     );
   }
 
+
+  @override
+  bool get wantKeepAlive => isKeepAlive();
+
   /// 是否自动处理网络请求对应页面展示
   bool _isAutoHandleHttpResult() => isAutoHandleHttpLoading() || isAutoHandleHttpError() || isAutoHandleHttpEmpty();
 
@@ -281,6 +289,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
 
   /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
   bool canClickPageHideKeyboard() => false;
+
+  /// 当页面存在PageView时,如果需要保证每一个tab不被销毁重写返回true
+  bool isKeepAlive() => false;
 
   /// 重写添加状态管理的provider
   List<SingleChildWidget> getProvider() {
@@ -318,8 +329,8 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   ///
   /// [setCustomerPageContent]返回null时页面显示[setPageContent]返回内容,
   /// [setCustomerPageContent]返回不为null时[setPageContent]不生效
-  Widget setPageContent(BuildContext context) => Container();
+  Widget setPageContent(BuildContext context) => Container(width: 20, height: 20,child: Text('     '),);
 
   /// 重写添加build方法return前需要执行的逻辑
-  void buildBeforeReturn() {}
+  void buildBeforeReturn(BuildContext context) {}
 }
