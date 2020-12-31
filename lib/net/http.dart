@@ -12,7 +12,7 @@ class HttpUtil {
   HttpController _controller;
 
   static HttpUtil getInstance({String baseUrl}) {
-    if(_instance == null){
+    if (_instance == null) {
       return HttpUtil._internal();
     }
     if (baseUrl == null) {
@@ -45,7 +45,8 @@ class HttpUtil {
   HttpUtil._internal() {
     Configuration configuration = Configuration();
     _controller = HttpController();
-    Map<String, String> headers = configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS);
+    Map<String, String> headers =
+        configuration.getConfiguration<Map<String, String>>(INITIAL_HEADERS);
     BaseOptions options = BaseOptions(
       baseUrl: configuration.getConfiguration<String>(NATIVE_API_HOST),
       connectTimeout: configuration.getConfiguration<int>(CONNECT_TIMEOUT),
@@ -57,20 +58,23 @@ class HttpUtil {
 
     _dio = new Dio(options);
 
-    // 添加拦截器
-    // 日志拦截器
-    if (configuration.getConfiguration<bool>(IS_PRINT)) {
-      _dio.interceptors.add(DioLogInterceptor());
-    }
+    // 请求状态拦截器
     _dio.interceptors.add(ConnectionStatusInterceptor(_controller));
-    // 配置拦截器
-    _dio.interceptors
-        .addAll(configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR));
+
+    // 自定义拦截器
+    _dio.interceptors.addAll(
+      configuration.getConfiguration<List<Interceptor>>(INTERCEPTOR),
+    );
+
+    // 日志拦截器
+    // if (configuration.getConfiguration<bool>(IS_PRINT)) {
+    //   _dio.interceptors.add(DioLogInterceptor());
+    // }
   }
 
   void cancelRequest(String tokenName) {
     tokenName = tokenName.split('(')[0];
-    _cancelTokens[tokenName].cancel("cancelled");
+    _cancelTokens[tokenName]?.cancel("cancelled");
   }
 
   HttpController httpController() => _controller;
@@ -154,15 +158,15 @@ class HttpUtil {
 
   /// restful delete 操作
   Future delete(
-      String path, {
-        @required BuildContext context,
-        dynamic params,
-        Options options,
-        bool refresh = false,
-        bool list = false,
-        String cacheKey,
-        bool cacheDisk = false,
-      }) async {
+    String path, {
+    @required BuildContext context,
+    dynamic params,
+    Options options,
+    bool refresh = false,
+    bool list = false,
+    String cacheKey,
+    bool cacheDisk = false,
+  }) async {
     Options requestOptions = options ?? Options();
     requestOptions = requestOptions.merge(extra: {
       "context": context,

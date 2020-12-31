@@ -40,6 +40,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
       HttpUtil().httpController().addListener(_onController);
     }
     LogUtil.logDebug(tag: '当前页面 =====>', text: widget.pagePath);
+    setComponentName(getWidgetName());
     onCreate();
     if (mounted) {}
     super.initState();
