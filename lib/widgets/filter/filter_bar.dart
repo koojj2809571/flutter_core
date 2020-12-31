@@ -75,10 +75,10 @@ class _FilterBarState extends State<FilterBar> {
       key: _filterBarKey,
       height: widget.height,
       decoration: BoxDecoration(
-        border: Border.all(
-          color: widget.borderColor,
-          width: widget.borderWidth,
-        ),
+        border: Border(
+          bottom: BorderSide( color: widget.borderColor,
+            width: widget.borderWidth,)
+        )
       ),
       child: GridView.count(
         crossAxisCount: _menuCount,
@@ -150,8 +150,8 @@ class _FilterBarState extends State<FilterBar> {
                   ),
                   Icon(
                     !_isShowConditionItem
-                        ? item.iconData ?? Icons.arrow_drop_down
-                        : item.iconData ?? Icons.arrow_drop_up,
+                        ? item.iconData ?? Icons.keyboard_arrow_down
+                        : item.iconData ?? Icons.keyboard_arrow_up,
                     color: _isShowConditionItem
                         ? _iconDropDownColor
                         : item?.textStyle?.color ?? widget.iconColor,
