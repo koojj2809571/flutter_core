@@ -23,7 +23,7 @@ class DioLogInterceptor extends InterceptorsWrapper {
         requestStr += "- BODY:\n${data.toString()}\n";
       }
     }
-    print(requestStr);
+    printWrapped(requestStr);
     return options;
   }
 
@@ -36,13 +36,13 @@ class DioLogInterceptor extends InterceptorsWrapper {
     errorStr +=
     "- HEADER:\n${err.response?.headers?.map?.mapToStructureString()??'head'}\n";
     if (err.response != null && err.response.data != null) {
-      print('╔ ${err.toString()}');
+      printWrapped('╔ ${err.toString()}');
       errorStr += "- ERROR:\n${ErrorEntity.createByDioError(err)}\n";
     } else {
       errorStr += "- ERRORTYPE: ${err.type}\n";
       errorStr += "- MSG: ${err.message}\n";
     }
-    print(errorStr);
+    printWrapped(errorStr);
     return err;
   }
 
