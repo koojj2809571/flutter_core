@@ -18,11 +18,11 @@ Widget getLabel(
   );
 }
 
-void showPickerDateTime(BuildContext context, Function onConfirm) {
+void showPickerDateTime(BuildContext context, Function onConfirm,{DateTime minTime}) {
   DatePicker.showDatePicker(
     context,
     showTitleActions: true,
-    minTime: DateTime.now(),
+    minTime: minTime ?? DateTime.now(),
     onConfirm: onConfirm,
     locale: LocaleType.zh,
   );

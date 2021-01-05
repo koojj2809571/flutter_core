@@ -38,6 +38,7 @@ Widget getSelectRow({
   double fontSize,
   Color textColor,
   Color hintColor = Colors.white12,
+  DateTime minTime
 }) {
   return Column(
     children: <Widget>[
@@ -95,7 +96,7 @@ Widget getSelectRow({
                       onSelect();
                       break;
                     case SelectType.DATE_TIME_TYPE:
-                      showPickerDateTime(context, onSelect);
+                      showPickerDateTime(context, onSelect,minTime: minTime);
                       break;
                   }
                 },
