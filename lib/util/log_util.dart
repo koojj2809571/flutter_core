@@ -21,4 +21,9 @@ class LogUtil{
   static void log({String tag,String text}){
     print('$tag:$text');
   }
+
+  static void segmentationLog(String content){
+    final pattern = new RegExp('.{1,800}');
+    pattern.allMatches(content).forEach((match) => log(tag: '', text: match.group(0)));
+  }
 }
