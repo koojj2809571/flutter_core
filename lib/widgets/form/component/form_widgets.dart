@@ -5,7 +5,7 @@ Widget getLabel(
   bool canEmpty,
  {double fontSize = 14,
  Color textColor = Colors.black,
- bool isBold}
+ bool isBold = false}
 ) {
   return Text.rich(
     TextSpan(
