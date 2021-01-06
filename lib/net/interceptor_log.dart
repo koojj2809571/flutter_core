@@ -23,7 +23,7 @@ class DioLogInterceptor extends InterceptorsWrapper {
         requestStr += "- BODY:\n${data.toString()}\n";
       }
     }
-    print(requestStr);
+    LogUtil.segmentationLog(requestStr);
     return options;
   }
 
@@ -36,13 +36,13 @@ class DioLogInterceptor extends InterceptorsWrapper {
     errorStr +=
     "- HEADER:\n${err.response?.headers?.map?.mapToStructureString()??'head'}\n";
     if (err.response != null && err.response.data != null) {
-      print('╔ ${err.toString()}');
+      LogUtil.segmentationLog('╔ ${err.toString()}');
       errorStr += "- ERROR:\n${ErrorEntity.createByDioError(err)}\n";
     } else {
       errorStr += "- ERRORTYPE: ${err.type}\n";
       errorStr += "- MSG: ${err.message}\n";
     }
-    print(errorStr);
+    LogUtil.segmentationLog(errorStr);
     return err;
   }
 
@@ -60,13 +60,8 @@ class DioLogInterceptor extends InterceptorsWrapper {
     if (response.data != null) {
       responseStr += "- BODY:\n${_parseResponse(response)}";
     }
-    printWrapped(responseStr);
+    LogUtil.segmentationLog(responseStr);
     return response;
-  }
-
-  void printWrapped(String text) {
-    final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
-    pattern.allMatches(text).forEach((match) => print(match.group(0)));
   }
 
   String _parseResponse(Response response) {
