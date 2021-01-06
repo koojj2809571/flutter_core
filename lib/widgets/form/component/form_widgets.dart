@@ -4,11 +4,12 @@ Widget getLabel(
   String label,
   bool canEmpty,
  {double fontSize = 14,
- Color textColor = Colors.black}
+ Color textColor = Colors.black,
+ bool isBold}
 ) {
   return Text.rich(
     TextSpan(
-      style: TextStyle(fontSize: fontSize, color: textColor),
+      style: TextStyle(fontSize: fontSize, color: textColor,fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
       children: [
         TextSpan(text: canEmpty ? '' : '*', style: TextStyle(color: Colors.red)),
         TextSpan(text: label),

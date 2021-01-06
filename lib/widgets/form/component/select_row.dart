@@ -38,7 +38,7 @@ Widget getSelectRow({
   double fontSize,
   Color textColor,
   Color hintColor = Colors.white12,
-  DateTime minTime
+  DateTime minTime,bool isBold = false
 }) {
   return Column(
     children: <Widget>[
@@ -49,7 +49,7 @@ Widget getSelectRow({
         child:
         Row(
           children: <Widget>[
-            getLabel(label, canEmpty,textColor: textColor,fontSize: fontSize ??14.w),
+            getLabel(label, canEmpty,textColor: textColor,fontSize: fontSize ??14.w,isBold: isBold),
             SizedBox(width: 20.w,),
             Expanded(
               child: InkWell(
