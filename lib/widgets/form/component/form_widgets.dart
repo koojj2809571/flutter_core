@@ -42,7 +42,7 @@ void showPickerModal(BuildContext context, List data, Function onConfirm) {
 
 void showPickerModalRange(BuildContext context, List data, Function onConfirm) {
   Picker(
-    adapter: PickerDataAdapter<String>(pickerdata: data,isArray: true),
+    adapter: PickerDataAdapter<String>(pickerdata: data),
     changeToFirst: true,
     hideHeader: false,
     cancelText: '取消',
