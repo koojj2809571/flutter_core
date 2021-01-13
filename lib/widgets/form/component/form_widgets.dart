@@ -80,15 +80,15 @@ Widget infoRow(String title, String value,
         TextSpan(
           text: '$title :  ',
           style: TextStyle(
-            color: Colors.black12,
-            fontSize: 10.sp,
+            color: Color.fromARGB(120, 0,0,0),
+            fontSize: 14.sp,
           ),
         ),
         TextSpan(
           text: value,
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 10.sp,
+            color: Color.fromARGB(245, 0,0,0),
+            fontSize: 14.sp,
           ),
         ),
         TextSpan(
