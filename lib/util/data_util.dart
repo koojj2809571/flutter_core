@@ -54,11 +54,12 @@ extension ListUtil on List {
       this.forEach((value) {
         if (value is Map) {
           var temp = value.mapToStructureString(indentation: indentation + 2);
-          result += "\n$indentationStr" + "\"$temp\",";
+          result += "\n$indentationStr" + "$temp,";
         } else if (value is List) {
           result += value.listToStructureString(indentation: indentation + 2);
         } else {
-          result += "\n$indentationStr" + "\"$value\",";
+          String temp = (value is String) ? "\"$value\"," : "$value,";
+          result += "\n$indentationStr" + temp;
         }
       });
       result = result.substring(0, result.length - 1);
@@ -88,7 +89,8 @@ extension MapUtil on Map {
               "\"$key\" : ${value.listToStructureString(
                   indentation: indentation + 2)},";
         } else {
-          result += "\n$indentationStr" + "\"$key\" : \"$value\",";
+          String temp = (value is String) ? "\"$value\"," : "$value,";
+          result += "\n$indentationStr" + "\"$key\" : " + temp;
         }
       });
       result = result.substring(0, result.length - 1);

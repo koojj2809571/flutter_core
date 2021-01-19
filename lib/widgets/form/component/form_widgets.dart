@@ -5,7 +5,7 @@ Widget getLabel(
   bool canEmpty,
  {double fontSize = 14,
  Color textColor = Colors.black,
- bool isBold}
+ bool isBold = false}
 ) {
   return Text.rich(
     TextSpan(
@@ -42,7 +42,7 @@ void showPickerModal(BuildContext context, List data, Function onConfirm) {
 
 void showPickerModalRange(BuildContext context, List data, Function onConfirm) {
   Picker(
-    adapter: PickerDataAdapter<String>(pickerdata: data,isArray: true),
+    adapter: PickerDataAdapter<String>(pickerdata: data),
     changeToFirst: true,
     hideHeader: false,
     cancelText: '取消',
@@ -80,15 +80,15 @@ Widget infoRow(String title, String value,
         TextSpan(
           text: '$title :  ',
           style: TextStyle(
-            color: Colors.black12,
-            fontSize: 10.sp,
+            color: Color.fromARGB(120, 0,0,0),
+            fontSize: 14.sp,
           ),
         ),
         TextSpan(
           text: value,
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 10.sp,
+            color: Color.fromARGB(245, 0,0,0),
+            fontSize: 14.sp,
           ),
         ),
         TextSpan(
