@@ -19,6 +19,7 @@ import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:auto_route/auto_route.dart';
 
 // 统一依赖第三方库
 export 'package:flutter_screenutil/flutter_screenutil.dart';

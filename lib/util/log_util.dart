@@ -23,7 +23,11 @@ class LogUtil{
   }
 
   static void segmentationLog(String content){
-    final pattern = new RegExp('.{1,800}');
-    pattern.allMatches(content).forEach((match) => log(tag: '', text: match.group(0)));
+    if(Global.isIOS){
+      log(tag: '', text: content);
+    }else {
+      final pattern = new RegExp('.{1,800}');
+      pattern.allMatches(content).forEach((match) => log(tag: '', text: match.group(0)));
+    }
   }
 }

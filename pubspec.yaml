@@ -31,6 +31,9 @@ dependencies:
   # 状态管理
   provider: ^4.3.2+2
 
+  # 路由导航
+  auto_route: ^0.6.9
+
   # 选择器
   flutter_datetime_picker: ^1.3.8
   flutter_picker:

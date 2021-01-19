@@ -10,6 +10,9 @@ abstract class LifeCircle{
   void onCreate();
 
   ///相当于onResume,只要页面来到栈顶,都会调用此方法,网络请求可以放在这个方法
+  void onResumeIsFirst({bool isFirst}){}
+
+  ///相当于onResume,只要页面来到栈顶,都会调用此方法,网络请求可以放在这个方法
   void onResume();
 
   ///页面被覆盖,暂停

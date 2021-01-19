@@ -1,5 +1,13 @@
 part of flutter_core;
 
+enum StartType{
+  Normal,RemoveUntil
+}
+
+enum FinishType{
+  Normal
+}
+
 // ignore: must_be_immutable
 abstract class BasePage extends StatefulWidget {
   BasePageState basePageState;
@@ -24,12 +32,40 @@ abstract class BasePage extends StatefulWidget {
   BasePageState getState();
 
   String getStateName() => basePageState.getWidgetName();
+
+  void startPage<T>(BasePageState from,{
+    StartType type: StartType.Normal ,
+    Object arguments,
+  }){
+    String routeName = this.toString().splitUpperCaseWith('/', '-');
+    switch(type){
+      case StartType.Normal:
+        ExtendedNavigator.root.push(routeName,
+          arguments: arguments
+        ).then((value){
+          from.onResumeIsFirst(isFirst: false);
+          from.onResume();
+          from.onBackResult<T>(value);
+        });
+        break;
+      case StartType.RemoveUntil:
+        ExtendedNavigator.root.pushAndRemoveUntil(routeName,
+          (Route<dynamic> route) => false,
+          arguments: arguments,
+        ).then((value){
+          from.onResumeIsFirst(isFirst: false);
+          from.onResume();
+          from.onBackResult<T>(value);
+        });
+        break;
+    }
+  }
 }
 
 abstract class BasePageState<T extends BasePage> extends State<T>
     with WidgetsBindingObserver, BaseFunction, LifeCircle, BaseScaffold, AutomaticKeepAliveClientMixin {
-  bool _onResumed = false; //页面展示标记
-  bool _onPause = false; //页面暂停标记
+
+  bool _onFirstResumed = false;
 
   @override
   void initState() {
@@ -73,29 +109,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
 
   @override
   void deactivate() {
-    // 以下场景调用该方法:以HomePage(第一页),NextPage(第二页)为例
-    // -当前路由栈中入栈其他页面,当前页面在栈中位置是第二个,也就是当前页面被移除屏幕显示的时候
-    // >> NextPage(initState) -> NextPage(didChangeDependencies) -> NextPage(build) -> HomePage(deactivate) -> HomePage(build)
-    // -当前页面在栈中位置是第二个,当栈顶页面被弹出栈,当前页面重回栈顶
-    // >> HomePage(deactivate) -> HomePage(build) -> NextPage(deactivate) -> NextPage(dispose)
-    // -当前页面被弹出栈
-    // >> HomePage(deactivate) -> HomePage(dispose)
-    if (NavigatorManger().isSecondTop(this)) {
-      // 当前页面不在栈顶
-      if (!_onPause) {
-        onPause();
-        _onPause = true;
-      } else {
-        onResume();
-        _onPause = false;
-      }
-    }
-    if (NavigatorManger().isTopPage(this)) {
-      // 当前页面在栈顶
-      if (!_onPause) {
-        onPause();
-      }
-    }
+    onPause();
     super.deactivate();
   }
 
@@ -106,11 +120,10 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     }
     buildBeforeReturn(context);
     // 调用场景与deactivate类似, 区别在于每次调用setState后该方法也会被调用
-    if (!_onResumed) {
-      if (NavigatorManger().isTopPage(this)) {
-        _onResumed = true;
-        onResume();
-      }
+    if (!_onFirstResumed) {
+      _onFirstResumed = true;
+      onResumeIsFirst(isFirst: true);
+      onResume();
     }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -123,8 +136,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   void dispose() {
     onDestroy();
     WidgetsBinding.instance.removeObserver(this);
-    _onResumed = false;
-    _onPause = false;
+    _onFirstResumed = false;
 
     // 取消网络请求
     if(isCancelRequestWhenDispose()) {
@@ -140,6 +152,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     if (state == AppLifecycleState.resumed) {
       if (NavigatorManger().isTopPage(this)) {
         onForeground();
+        onResumeIsFirst(isFirst: true);
         onResume();
       }
     } else if (state == AppLifecycleState.paused) {
@@ -262,6 +275,17 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   @override
   bool get wantKeepAlive => isKeepAlive();
 
+  void finishPage({
+    FinishType type: FinishType.Normal,
+    Object result,
+  }){
+    switch(type){
+      case FinishType.Normal:
+        ExtendedNavigator.root.pop(result);
+        break;
+    }
+  }
+
   /// 是否自动处理网络请求对应页面展示
   bool _isAutoHandleHttpResult() => isAutoHandleHttpLoading() || isAutoHandleHttpError() || isAutoHandleHttpEmpty();
 
@@ -297,6 +321,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   List<SingleChildWidget> getProvider() {
     return null;
   }
+
+  /// 重写添加其他页面返回结果处理
+  void onBackResult<T>(T result){}
 
   /// 不使用Scaffold时重写,页面中可调用或重写
   /// [setErrorContent] - 重写自定义错误控件

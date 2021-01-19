@@ -8,6 +8,32 @@ extension StringUtil on String {
 
   /// 非空判断包含空格
   bool get blank => this.empty || this.trim().isEmpty;
+  
+  List<int> get upperCaseIndex {
+    List<int> indexes = [];
+    for(int i = 0; i < this.codeUnits.length; i++){
+      int value = this.codeUnits[i];
+      if(value >= 65 && value <= 90){
+        indexes.add(i);
+      }
+    }
+    return indexes;
+  }
+
+  String splitUpperCaseWith(String start, String split){
+    if(start == null || split == null) return null;
+    List<int> indexes = this.upperCaseIndex;
+    if(indexes[0] != 0){
+      indexes.insert(0, 0);
+    }
+
+    var temp = <String>[];
+    for(int i = 0; i < indexes.length; i++){
+      int end = i == indexes.length - 1 ? this.length : indexes[i + 1];
+      temp.add(this.toLowerCase().substring(indexes[i], end));
+    }
+    return '$start${temp.join(split)}';
+  }
 }
 
 extension NumberUtil on num {

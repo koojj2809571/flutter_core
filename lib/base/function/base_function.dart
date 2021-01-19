@@ -260,7 +260,7 @@ abstract class BaseFunction {
 
   String getWidgetNameByClass(BuildContext context) {
     if (_contextBaseFunction == null) {
-      return "";
+      return "".toUpperCase();
     }
     String className = _contextBaseFunction.toString();
     if (className == null) {
