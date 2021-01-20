@@ -33,7 +33,7 @@ abstract class BasePage extends StatefulWidget {
 
   String getStateName() => basePageState.getWidgetName();
 
-  void startPage<T>(BasePageState from,{
+  void startPage<T>(LifeCircle from,{
     StartType type: StartType.Normal ,
     Object arguments,
   }){
@@ -321,9 +321,6 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   List<SingleChildWidget> getProvider() {
     return null;
   }
-
-  /// 重写添加其他页面返回结果处理
-  void onBackResult<T>(T result){}
 
   /// 不使用Scaffold时重写,页面中可调用或重写
   /// [setErrorContent] - 重写自定义错误控件
