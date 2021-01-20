@@ -32,4 +32,7 @@ abstract class LifeCircle{
   void onDestroy() {
     LogUtil.logDebug(text: "$name-销毁");
   }
+
+  /// 重写添加其他页面返回结果处理
+  void onBackResult<T>(T result){}
 }
