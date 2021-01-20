@@ -28,6 +28,8 @@ export 'package:flutter_easyrefresh/easy_refresh.dart';
 export 'package:fluttertoast/fluttertoast.dart';
 export 'package:smooth_star_rating/smooth_star_rating.dart';
 export 'package:dio/dio.dart';
+export 'package:auto_route/auto_route.dart';
+export 'package:auto_route/auto_route_annotations.dart';
 
 // 基类模块
 part 'base/function/base_function.dart';
