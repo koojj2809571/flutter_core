@@ -150,6 +150,33 @@ Widget infoRow(String title, String value,
   );
 }
 
+Widget infoRowEx(String title, String value,{bool modify,Widget right}) {
+  assert((modify != null && right != null) || (modify == null && right == null));
+  return (modify != null && modify) ? right : Container(
+    margin: EdgeInsets.only(left: 15.w),
+    alignment: Alignment.centerLeft,
+    padding: EdgeInsets.only(bottom: 10.h),
+    child: Text.rich(
+      TextSpan(children: [
+        TextSpan(
+          text: '$title :  ',
+          style: TextStyle(
+            color: Color.fromARGB(120, 0,0,0),
+            fontSize: 14.sp,
+          ),
+        ),
+        TextSpan(
+          text: value,
+          style: TextStyle(
+            color: Color.fromARGB(245, 0,0,0),
+            fontSize: 14.sp,
+          ),
+        ),
+      ]),
+    ),
+  );
+}
+
 Widget selectListRow({
   String title,
   String val,
