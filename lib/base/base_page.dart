@@ -5,7 +5,7 @@ enum StartType{
 }
 
 enum FinishType{
-  Normal
+  Normal,Cancel
 }
 
 // ignore: must_be_immutable
@@ -45,7 +45,7 @@ abstract class BasePage extends StatefulWidget {
         ).then((value){
           from.onResumeIsFirst(isFirst: false);
           from.onResume();
-          from.onBackResult<T>(value);
+          from.onBackResult(value);
         });
         break;
       case StartType.RemoveUntil:
@@ -55,7 +55,7 @@ abstract class BasePage extends StatefulWidget {
         ).then((value){
           from.onResumeIsFirst(isFirst: false);
           from.onResume();
-          from.onBackResult<T>(value);
+          from.onBackResult(value);
         });
         break;
     }
@@ -282,6 +282,9 @@ abstract class BasePageState<T extends BasePage> extends State<T>
     switch(type){
       case FinishType.Normal:
         ExtendedNavigator.root.pop(result);
+        break;
+      case FinishType.Cancel:
+        ExtendedNavigator.root.pop();
         break;
     }
   }
