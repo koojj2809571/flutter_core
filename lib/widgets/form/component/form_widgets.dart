@@ -1,25 +1,26 @@
 part of flutter_core;
 
-Widget getLabel(
-  String label,
-  bool canEmpty,
- {double fontSize = 14,
- Color textColor = Colors.black,
- bool isBold = false}
-) {
+Widget getLabel(String label, bool canEmpty,
+    {double fontSize = 14,
+    Color textColor = Colors.black,
+    bool isBold = false}) {
   return Text.rich(
     TextSpan(
-      style: TextStyle(fontSize: fontSize, color: textColor,fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+      style: TextStyle(
+          fontSize: fontSize,
+          color: textColor,
+          fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
       children: [
-        TextSpan(text: canEmpty ? '' : '*', style: TextStyle(color: Colors.red)),
+        TextSpan(
+            text: canEmpty ? '' : '*', style: TextStyle(color: Colors.red)),
         TextSpan(text: label),
-
       ],
     ),
   );
 }
 
-void showPickerDateTime(BuildContext context, Function onConfirm,{DateTime minTime}) {
+void showPickerDateTime(BuildContext context, Function onConfirm,
+    {DateTime minTime}) {
   DatePicker.showDatePicker(
     context,
     showTitleActions: true,
@@ -48,7 +49,6 @@ void showPickerModalRange(BuildContext context, List data, Function onConfirm) {
     cancelText: '取消',
     confirmText: '确定 ',
     onConfirm: onConfirm,
-
   ).showModal(context); //_scaffoldKey.currentState);
 }
 
@@ -64,13 +64,16 @@ void showPickerArray(BuildContext context, String data, Function onConfirm) {
   ).showModal(context); //_scaffoldKey.currentState);
 }
 
-Widget infoRow(String title, String value,
-    [String hitValue1,
-    Function onClick1,
-    String hitValue2,
-    Function onClick2,
-    String hitValue3,
-    Function onClick3]) {
+Widget infoRow(
+  String title,
+  String value, [
+  String hitValue1,
+  Function onClick1,
+  String hitValue2,
+  Function onClick2,
+  String hitValue3,
+  Function onClick3,
+]) {
   return Container(
     margin: EdgeInsets.only(left: 15.w),
     alignment: Alignment.centerLeft,
@@ -80,14 +83,14 @@ Widget infoRow(String title, String value,
         TextSpan(
           text: '$title :  ',
           style: TextStyle(
-            color: Color.fromARGB(120, 0,0,0),
+            color: Color.fromARGB(120, 0, 0, 0),
             fontSize: 14.sp,
           ),
         ),
         TextSpan(
           text: value,
           style: TextStyle(
-            color: Color.fromARGB(245, 0,0,0),
+            color: Color.fromARGB(245, 0, 0, 0),
             fontSize: 14.sp,
           ),
         ),
