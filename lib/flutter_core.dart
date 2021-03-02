@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';

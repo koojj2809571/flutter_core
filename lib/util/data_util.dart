@@ -8,6 +8,21 @@ extension StringUtil on String {
 
   /// 非空判断包含空格
   bool get blank => this.empty || this.trim().isEmpty;
+
+  void log(){
+    print(this);
+  }
+
+  void logDebug({String tag: LogUtil.TAG_TEST}){
+    LogUtil.log(tag: tag, text: this);
+  }
+
+  String get MD5{
+    var content = new Utf8Encoder().convert(this);
+    var digest = md5.convert(content);
+    // 这里其实就是 digest.toString()
+    return hex.encode(digest.bytes);
+  }
   
   List<int> get upperCaseIndex {
     List<int> indexes = [];
