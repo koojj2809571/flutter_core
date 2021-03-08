@@ -34,6 +34,7 @@ abstract class BasePage extends StatefulWidget {
   String getStateName() => basePageState.getWidgetName();
 
   void startPage<T>(LifeCircle from,{
+    int requestCode,
     StartType type: StartType.Normal ,
     Object arguments,
   }){
@@ -45,7 +46,7 @@ abstract class BasePage extends StatefulWidget {
         ).then((value){
           from.onResumeIsFirst(isFirst: false);
           from.onResume();
-          from.onBackResult(value);
+          from.onBackResult(requestCode,value);
         });
         break;
       case StartType.RemoveUntil:
@@ -55,7 +56,7 @@ abstract class BasePage extends StatefulWidget {
         ).then((value){
           from.onResumeIsFirst(isFirst: false);
           from.onResume();
-          from.onBackResult(value);
+          from.onBackResult(requestCode,value);
         });
         break;
     }
@@ -314,8 +315,8 @@ abstract class BasePageState<T extends BasePage> extends State<T>
   /// 返回true直接退出,当子类需要添加点击返回逻辑时重写该方法,默认true
   Future<bool> onBackPressed() async => true;
 
-  /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认false
-  bool canClickPageHideKeyboard() => false;
+  /// 重写改变返回值,true-点击页面时收起键盘,false无此功能,默认true
+  bool canClickPageHideKeyboard() => true;
 
   /// 当页面存在PageView时,如果需要保证每一个tab不被销毁重写返回true
   bool isKeepAlive() => false;

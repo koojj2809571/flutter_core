@@ -4,21 +4,26 @@ typedef void CancelSelectedItem(int id);
 
 Future<T> showMultiChoiceBottomSheet<T>(
     BuildContext context,
-    List<String> data, {
+    List<String> names, {
+      List<Object> values,
+      bool isShortTag: true,
       List<String> selectedData,
       List<int> selectedExtra,
       CancelSelectedItem cancelSelectedItem,
+      void onSelected(List names, List values),
     }) async {
   List<TagItem> tags = [];
   selectedData = selectedData ?? [];
   selectedExtra = selectedExtra ?? [];
-  for (int i = 0; i < data.length; i++) {
-    bool isCreated = selectedData != null && selectedData.contains(data[i]);
+
+  for (int i = 0; i < names.length; i++) {
+    bool isCreated = selectedData != null && selectedData.contains(names[i]);
     tags.add(TagItem(
-      name: data[i],
+      name: names[i],
       isCreated: isCreated,
       isSelected: isCreated,
       id: selectedExtra.isNotEmpty ? selectedExtra[i] : -1,
+      value: (values ?? [])[i],
     ));
   }
   return await showModalBottomSheet<T>(
@@ -71,11 +76,14 @@ Future<T> showMultiChoiceBottomSheet<T>(
                       ),
                       onTap: () {
                         List<String> results = [];
+                        List<Object> values = [];
                         for (TagItem tag in tags) {
                           if (tag.isSelected) {
                             results.add(tag.name);
+                            values.add(tag.value);
                           }
                         }
+                        onSelected(results,values);
                         Navigator.pop(context, results);
                       },
                     ),
@@ -87,13 +95,15 @@ Future<T> showMultiChoiceBottomSheet<T>(
               height: 1.h,
               color: Colors.black12,
             ),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 20.w,
-                vertical: 30.h,
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.w,
+                  vertical: 30.h,
+                ),
+                child: Tag(tags, cancelSelectedItem, isShortTag),
               ),
-              child: Tag(tags, cancelSelectedItem),
-            )
+            ),
           ],
         ),
       );
@@ -106,20 +116,23 @@ class TagItem {
   bool isSelected;
   bool isCreated;
   int id;
+  var value;
 
   TagItem({
     this.name,
     this.isSelected,
     this.isCreated,
     this.id,
+    this.value,
   });
 }
 
 class Tag extends StatefulWidget {
   final List<TagItem> data;
   final CancelSelectedItem cancelSelectedItem;
+  final bool isShortTag;
 
-  Tag(this.data, this.cancelSelectedItem);
+  Tag(this.data, this.cancelSelectedItem,this.isShortTag);
 
   @override
   _TagState createState() => _TagState();
@@ -149,6 +162,7 @@ class _TagState extends State<Tag> {
           });
         },
         child: Container(
+          width: double.infinity,
           margin: EdgeInsets.all(5.w),
           padding: EdgeInsets.symmetric(vertical: 5.h, horizontal: 10.w),
           decoration: BoxDecoration(
@@ -167,9 +181,9 @@ class _TagState extends State<Tag> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Wrap(
-        direction: Axis.horizontal,
+    return Container(
+      height: double.infinity,
+      child: ListView(
         children: getTag(data.length, data),
       ),
     );

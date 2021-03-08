@@ -69,6 +69,8 @@ extension StringUtil on String {
 extension NumberUtil on num {
   /// 非空判断包含null
   bool get empty => this == null;
+
+  double sbh(BuildContext context) => MediaQuery.of(context).padding.top;
 }
 
 extension ListUtil on List {

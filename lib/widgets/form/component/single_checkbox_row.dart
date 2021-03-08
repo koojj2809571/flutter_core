@@ -8,20 +8,23 @@ Widget getSingleCheckBoxRow<T>(
   List<T> selectionValue, {
   bool withDivider,
   Function onChange,
-  paddingTop: 10.0,
-  paddingBottom: 10.0,
+  paddingTop,
+  paddingBottom,
   Color theme,
+  double textSize,
+  Color textColor,
 }) {
   return Column(
     children: <Widget>[
       Container(
-        padding: EdgeInsets.only(top: paddingTop, bottom: paddingBottom),
+        padding: EdgeInsets.only(
+            top: paddingTop ?? 6.h, bottom: paddingBottom ?? 6.h),
         child: Flex(
           direction: Axis.horizontal,
           children: <Widget>[
             Expanded(
               flex: 0,
-              child: getLabel(label, canEmpty),
+              child: getLabel(label, canEmpty, fontSize: textSize ?? 14.sp),
             ),
             Expanded(
               flex: 1,
@@ -38,7 +41,13 @@ Widget getSingleCheckBoxRow<T>(
                                 groupValue: groupValue,
                                 onChanged: onChange,
                               ),
-                              Text(selectionTitle[e]),
+                              Text(
+                                selectionTitle[e],
+                                style: TextStyle(
+                                  fontSize: textSize ?? 14.sp,
+                                  color: textColor ?? Color.fromRGBO(171, 171, 171, 1)
+                                ),
+                              ),
                             ],
                           ))
                       .toList()),

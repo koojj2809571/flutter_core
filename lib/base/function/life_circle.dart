@@ -34,5 +34,5 @@ abstract class LifeCircle{
   }
 
   /// 重写添加其他页面返回结果处理
-  void onBackResult(dynamic result){}
+  void onBackResult(int requestCode, dynamic result){}
 }
