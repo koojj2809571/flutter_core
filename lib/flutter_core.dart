@@ -32,6 +32,7 @@ export 'package:smooth_star_rating/smooth_star_rating.dart';
 export 'package:dio/dio.dart';
 export 'package:auto_route/auto_route.dart';
 export 'package:auto_route/auto_route_annotations.dart';
+export 'package:url_launcher/url_launcher.dart';
 
 // 基类模块
 part 'base/function/base_function.dart';
