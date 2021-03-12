@@ -15,7 +15,7 @@ abstract class BasePage extends StatefulWidget {
 
   BasePage(){
     if(Config.debug) {
-      String className = this.toString();
+      String className = runtimeType.toString();
       String path = StackTrace.current.toString().split(className)[1];
       path = path.split(')')[0];
       path = path.split('(')[1];
@@ -38,7 +38,7 @@ abstract class BasePage extends StatefulWidget {
     StartType type: StartType.Normal ,
     Object arguments,
   }){
-    String routeName = this.toString().splitUpperCaseWith('/', '-');
+    String routeName = runtimeType.toString().splitUpperCaseWith('/', '-');
     switch(type){
       case StartType.Normal:
         ExtendedNavigator.root.push(routeName,
