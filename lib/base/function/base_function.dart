@@ -10,7 +10,7 @@ abstract class BaseFunction {
 
   String _errImgPath = Configuration().getConfiguration<String>(ERROR_IMAGE_PATH);
 
-  bool _isLoadingWidgetShow = false;
+  bool isLoadingWidgetShow = false;
 
   bool _isEmptyWidgetVisible = false;
 
@@ -163,7 +163,7 @@ abstract class BaseFunction {
           _isEmptyWidgetVisible = false;
         }
         // 不管如何loading页面要关闭，
-        _isLoadingWidgetShow = false;
+        isLoadingWidgetShow = false;
         _isErrorWidgetShow = isVisible;
       });
     }
@@ -180,7 +180,7 @@ abstract class BaseFunction {
         }
 
         // 不管如何loading页面关闭，
-        _isLoadingWidgetShow = false;
+        isLoadingWidgetShow = false;
         _isEmptyWidgetVisible = isVisible;
       });
     }
@@ -189,7 +189,7 @@ abstract class BaseFunction {
   void setLoadingWidgetVisible(bool isVisible) {
     if (_stateBaseFunction != null && _stateBaseFunction.mounted) {
       _stateBaseFunction.setState(() {
-        _isLoadingWidgetShow = isVisible;
+        isLoadingWidgetShow = isVisible;
       });
     }
   }

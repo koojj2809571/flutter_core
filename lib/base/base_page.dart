@@ -225,7 +225,7 @@ abstract class BasePageState<T extends BasePage> extends State<T>
               bottom: 0,
               child: _getBaseEmptyWidget(),
             ),
-          if (_isLoadingWidgetShow)
+          if (isLoadingWidgetShow)
             Positioned(
               left: 0,
               top: 0,
